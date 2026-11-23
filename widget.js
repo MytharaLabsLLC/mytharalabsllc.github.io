@@ -414,7 +414,7 @@ class MytharaWidget {
 
         // Pricing / Cost
         if (lowerInput.includes('pricing') || lowerInput.includes('cost') || lowerInput.includes('price') || lowerInput.includes('how much')) {
-            return "SoulCradle starts with a 90-day pilot: $5,000 self-guided or $15,000 white-glove, and either pilot is credited in full toward the first annual license if you convert. After that, Commercial licensing is $24,000 per year and Enterprise starts at $75,000 per year. The bots are one-time prices from $750 to $3,500, or $14,900 for the full suite of fifteen. The Witness Gate is free and open source. Which would you like to hear more about?";
+            return "SoulCradle starts with a 90-day pilot at $5,000, self-guided, and the pilot fee is credited in full toward the first annual license if you convert. After that, Commercial licensing is $24,000 per year and Enterprise starts at $75,000 per year. The bots are one-time prices from $750 to $3,500, or $14,900 for the full suite of fifteen. The Witness Gate is free and open source. Which would you like to hear more about?";
         }
 
         // Frameworks / Compliance
@@ -551,7 +551,7 @@ class MytharaWidget {
             setTimeout(() => {
                 this.hideTypingIndicator();
                 this.addMessage("Which tier fits your current stage?");
-                this.addQuickReplies(['Self-Guided pilot', 'White-Glove pilot', 'See the bots']);
+                this.addQuickReplies(['Self-Guided pilot', 'Enterprise licensing', 'See the bots']);
             }, 1000);
         }
         
