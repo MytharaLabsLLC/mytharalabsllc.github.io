@@ -1,14 +1,12 @@
 /**
- * MytharaConnect Chat Widget - Enterprise Grade
- * 
- * Copyright © 2025 Herbert Velez Jr. All rights reserved.
- * 
- * Best-in-class chat widget for Global Governance positioning
- * - Comprehensive error handling
- * - Fast client-side responses
- * - Mobile-responsive
- * - Industry-aware conversations
- * - Seamless pricing tier integration
+ * Mythara site chat widget
+ *
+ * Copyright (c) Mythara Labs LLC. All rights reserved.
+ *
+ * A client-side guide for mytharalabs.com. Every answer in the script
+ * below states only what the company page itself states: the SoulCradle
+ * pilots and licenses, the bots and their prices, the free Witness Gate,
+ * and email support answered within 5 business days.
  */
 
 class MytharaWidget {
@@ -257,14 +255,9 @@ class MytharaWidget {
         this.showTypingIndicator();
         setTimeout(() => {
             this.hideTypingIndicator();
-            this.addMessage(`Hey there! I'm ${agentName}. I'm here to help you learn about Mythara's Soul Cradle and Global Governance—tools that make AI safety easier. What questions can I answer for you?`, false);
+            this.addMessage(`Hey there! I'm ${agentName}, the guide for Mythara Labs. I can answer questions about SoulCradle, the governance core every product here runs on, the bots we sell, and the free Witness Gate. What would you like to know?`, false);
             
-            // Add subtle note about rotating representatives and nonprofit pricing
-            setTimeout(() => {
-                this.addMessage(`<em style="font-size: 0.85em; opacity: 0.7;">We have representatives around the globe, so you'll always have someone to talk to. Nonprofits doing good work? Ask about special pricing!</em>`, false);
-            }, 400);
-            
-            this.addQuickReplies(['What is Soul Cradle?', 'Show pricing', 'Nonprofit pricing?']);
+            this.addQuickReplies(['What is SoulCradle?', 'Show pricing', 'What is the Witness Gate?']);
         }, 800);
     }
     
@@ -413,171 +406,132 @@ class MytharaWidget {
     getResponse(message) {
         const lowerInput = message.toLowerCase();
         this.conversationStage = Math.min(this.conversationStage + 1, 4);
-        
-        // Global Governance / What is Mythara
-        if (lowerInput.includes('what is') || lowerInput.includes('mythara') || lowerInput.includes('governance')) {
-            return "Mythara Engine protects your AI from manipulation and keeps it compliant. We catch adversarial attacks and emotional manipulation patterns before they cause problems. Most small businesses start with our Startup Small Teams tier at 249 per month to validate their system, then scale up as they grow. Which tier makes sense for your stage?";
+
+        // What is Mythara / SoulCradle
+        if (lowerInput.includes('what is') || lowerInput.includes('mythara') || lowerInput.includes('soulcradle') || lowerInput.includes('soul cradle') || lowerInput.includes('governance')) {
+            return "Mythara Labs LLC is a Denver software company built around one governance core: SoulCradle. SoulCradle checks every action an AI agent proposes before it runs, against compliance rules with a benevolence engine woven through them, and seals every judgment in a tamper-evident record that stays in your own environment. Regulated teams license SoulCradle itself. Our other products, a training simulation, readiness assessments, and a shelf of working bots, are built on the same core. Want the pricing, or the free Witness Gate first?";
         }
-        
-            // Pricing / Cost
-            if (lowerInput.includes('pricing') || lowerInput.includes('cost') || lowerInput.includes('price') || lowerInput.includes('how much')) {
-                return "We have tiers for every stage. Startup Small Teams is 249 per month, perfect for small businesses with 1 to 10 employees. If you're an early stage AI company, the Startup License at 2500 per month gives you 100 thousand API calls. Growing companies at 5 to 50 million ARR typically choose our Growth License at 10 thousand per month. Which stage is your company at?";
-            }        // 34 frameworks
-        if (lowerInput.includes('framework') || lowerInput.includes('regulation') || lowerInput.includes('compliance') || lowerInput.includes('34')) {
-            return "We validate against 34 regulatory frameworks including HIPAA, GDPR, FINRA, FDA, and the EU AI Act. Your industry likely has 5 to 10 that apply. Most small teams start with our Startup Small Teams tier at 249 per month for initial validation. Should I send you the integration docs to get started?";
+
+        // Pricing / Cost
+        if (lowerInput.includes('pricing') || lowerInput.includes('cost') || lowerInput.includes('price') || lowerInput.includes('how much')) {
+            return "SoulCradle starts with a 90-day pilot: $5,000 self-guided or $15,000 white-glove, and either pilot is credited in full toward the first annual license if you convert. After that, Commercial licensing is $24,000 per year and Enterprise starts at $75,000 per year. The bots are one-time prices from $750 to $3,500, or $14,900 for the full suite of fifteen. The Witness Gate is free and open source. Which would you like to hear more about?";
         }
-        
-        // Adversarial hardening / Security
-        if (lowerInput.includes('adversarial') || lowerInput.includes('security') || lowerInput.includes('attack') || lowerInput.includes('loophole')) {
-            return "We catch hidden characters, homoglyph attacks, prompt injections, and data exfiltration attempts. Every validation gets cryptographically signed for audit trails. Most teams integrate this in a few hours. Want me to have our team reach out about your specific security needs?";
+
+        // Frameworks / Compliance
+        if (lowerInput.includes('framework') || lowerInput.includes('regulation') || lowerInput.includes('compliance') || lowerInput.includes('hipaa') || lowerInput.includes('gdpr') || lowerInput.includes('soc 2')) {
+            return "The governance core maps controls against the frameworks the regulated world runs on: the HIPAA Security Rule, FDA 21 CFR Part 11, SOC 2, and ISO 27001, organized in a multi-jurisdiction matrix. The work is readiness mapping, controls checked against each framework and cited to the rule version they were judged under. It is stated as readiness mapping, never as certification. Our readiness assessments are sold as engagements on exactly those terms.";
         }
-        
+
+        // Security / SERE
+        if (lowerInput.includes('adversarial') || lowerInput.includes('security') || lowerInput.includes('attack') || lowerInput.includes('sere') || lowerInput.includes('loophole')) {
+            return "On the governing side, eight witnesses judge every proposed action under versioned rubrics before it executes, and three findings can block outright: deception under Eros, deception under Hermes, and disproportionate harm under Nemesis. Every judgment is sealed into a hash-chained record. On the tooling side, SERE is our guarding line: SERE Legacy does sandboxed specimen analysis for training and triage at $2,500, and SERE Desktop is a single-machine Windows security suite at $3,500. SERE Enterprise is in development and is not sold. SERE guards; it never attacks.";
+        }
+
         // Legal indemnification
         if (lowerInput.includes('indemnif') || lowerInput.includes('legal') || lowerInput.includes('liability') || lowerInput.includes('coverage')) {
-            return "No indemnification is currently offered on any tier. Can I help you compare tiers on features, support, or compliance coverage instead?";
+            return "No indemnification is currently offered on any product. The license terms are the ones accepted at checkout, and fees are non-refundable except as stated in Sections 7.2 and 11.4 of those terms. For anything specific, email info@mytharalabs.com.";
         }
-        
+
         // ROI / Business case
-        if (lowerInput.includes('roi') || lowerInput.includes('return') || lowerInput.includes('save') || lowerInput.includes('business case')) {
-            return "A single GDPR fine can reach 20 million euros or more. One FDA warning letter can delay your launch 6 to 12 months. Our Startup Small Teams tier starts at 249 per month. Most teams see positive ROI within the first month by avoiding just one compliance issue. Want me to send you our ROI calculator?";
+        if (lowerInput.includes('roi') || lowerInput.includes('return') || lowerInput.includes('save') || lowerInput.includes('business case') || lowerInput.includes('worth')) {
+            return "The case for SoulCradle is the record: every agent action judged before it runs, blocked when it should be, and provable afterward from a sealed ledger your own team holds. We do not publish an ROI calculator or promise savings figures. The honest way to judge it is the 90-day pilot on your own agent actions, $5,000 self-guided, credited in full toward the first annual license if you convert.";
         }
-        
+
         // How it works / Technical
-        if (lowerInput.includes('how') || lowerInput.includes('technical') || lowerInput.includes('api') || lowerInput.includes('integrate')) {
-            return "REST API with JSON. Most teams integrate in a few hours using our SDK. We provide sandbox keys for testing. Should I email you the API documentation and a sandbox key to start testing today?";
+        if (lowerInput.includes('how') || lowerInput.includes('technical') || lowerInput.includes('api') || lowerInput.includes('integrate') || lowerInput.includes('work')) {
+            return "SoulCradle is delivered software. It runs in your environment, your cloud, your servers, or air-gapped, and the judgment record is generated and kept there; Mythara Labs does not receive your data. There is no hosted sandbox key to hand out. To see the gate work today, the Witness Gate is free and open source on GitHub, and the demo on this page runs the same verdict rules in your browser.";
         }
-        
+
         // Industries
-        if (lowerInput.includes('industry') || lowerInput.includes('who uses') || lowerInput.includes('healthcare') || lowerInput.includes('finance')) {
-            return "The system is built for regulated industries like healthcare AI (HIPAA), financial services (FINRA), pharma (FDA), and defense (ITAR). Each industry has specific compliance requirements it is designed to address. Which industry describes your AI application best?";
+        if (lowerInput.includes('industry') || lowerInput.includes('who uses') || lowerInput.includes('healthcare') || lowerInput.includes('finance') || lowerInput.includes('defense')) {
+            return "SoulCradle is built for regulated teams: healthcare, financial services, pharma, and defense are the natural fits, because those are the worlds the readiness mapping covers, the HIPAA Security Rule, FDA 21 CFR Part 11, SOC 2, and ISO 27001. Which of those is closest to your work?";
         }
-        
+
         // Competition / Alternatives
         if (lowerInput.includes('competitor') || lowerInput.includes('alternative') || lowerInput.includes('versus') || lowerInput.includes('compare')) {
-            return "You could definitely build something yourself or use other compliance tools. Main difference with us is we specifically focus on AI safety and manipulation detection, which isn't something most tools do. But yeah, there are other options out there—happy to talk through what makes sense for your situation.";
+            return "You could build governance yourself or use other compliance tools. The difference here is the shape of the thing: judgments are made before actions run, by eight witnesses under versioned rubrics, and the sealed record stays in your building, verifiable without us. The free Witness Gate lets you test that claim before you spend anything.";
         }
-        
+
         // Implementation / Onboarding
-        if (lowerInput.includes('implement') || lowerInput.includes('onboard') || lowerInput.includes('getting started') || lowerInput.includes('setup')) {
-            return "Getting started is pretty easy. For Startup Small Teams and Startup License tiers, you basically just sign up and start using the API—most people are up and running same day. Higher tiers like Growth and Enterprise we do a kickoff call, help you integrate it properly, and make sure everything's working how you need it. Usually takes a few days to a week depending on your setup.";
+        if (lowerInput.includes('implement') || lowerInput.includes('onboard') || lowerInput.includes('getting started') || lowerInput.includes('setup') || lowerInput.includes('start')) {
+            return "A pilot runs 90 days on your own agent actions. Delivery begins within 5 business days of the pilot fee. Support is by email, answered within 5 business days. To start, buy a pilot on this page or email info@mytharalabs.com with questions first.";
         }
-        
+
         // Support
         if (lowerInput.includes('support') || lowerInput.includes('help') || lowerInput.includes('assistance')) {
-            return "Startup tiers get email support with same day response. Professional and Growth License get priority support with 12 hour response. Enterprise gets 24 7 premium support with 2 hour response if something breaks at 3am. We try to be pretty responsive—compliance stuff can be time-sensitive.";
+            return "Support is by email at info@mytharalabs.com, answered within 5 business days. That is the support term on the pilots, the licenses, and the bots alike.";
         }
-        
-        // Data privacy / Security
+
+        // Data privacy
         if (lowerInput.includes('privacy') || lowerInput.includes('data') || lowerInput.includes('encryption')) {
-            return "Your data stays yours—we don't sell it or do anything weird with it. Everything's encrypted, and we're building to SOC 2 standards. You can see the full security details at mythara.ai/security if you want to dig into the technical stuff.";
+            return "Your record stays in your building. SoulCradle runs in your environment and the judgment record it produces is generated and kept there. Mythara Labs does not receive your data, and any ledger you export verifies on its own, every seal re-checked, without our involvement.";
         }
-        
+
         // Contract / Terms
-        if (lowerInput.includes('contract') || lowerInput.includes('commitment') || lowerInput.includes('term') || lowerInput.includes('cancel')) {
-            return "We do monthly or annual contracts. If you want to cancel, just give us 30 days notice—no tricks or hidden fees. If you want to upgrade partway through, we'll credit what you already paid. Trying to keep it simple and fair.";
+        if (lowerInput.includes('contract') || lowerInput.includes('commitment') || lowerInput.includes('term') || lowerInput.includes('cancel') || lowerInput.includes('refund')) {
+            return "Pilots are 90 days and are credited in full toward the first annual license if you convert. License and bot fees are one-time or annual as listed, and non-refundable except as stated in Sections 7.2 and 11.4 of the terms accepted at checkout. For a specific situation, email info@mytharalabs.com.";
         }
-        
+
         // Proof / Case studies
-        if (lowerInput.includes('proof') || lowerInput.includes('case study') || lowerInput.includes('customer') || lowerInput.includes('reference')) {
-            return "We've tested the system pretty extensively—you can see the test results in our repo. We run an early-access program, but we don't name participants publicly. If you want to talk specifics or get a reference conversation set up, email Mythara.Engine@yahoo.com and we can figure something out.";
+        if (lowerInput.includes('proof') || lowerInput.includes('case study') || lowerInput.includes('customer') || lowerInput.includes('reference') || lowerInput.includes('news')) {
+            return "The proof is public. The Mythara News Network runs this same system in the open every night: the witnesses judge the day's stories and the print and radio editions are published free for anyone to check against the record. The Witness Gate code and its 47 passing tests are on GitHub. We do not name customers publicly.";
         }
-        
-        // Startup specific
-        if (lowerInput.includes('startup') || lowerInput.includes('small') || lowerInput.includes('seed')) {
-            return "We have two startup tiers. Startup Small Teams at 249 per month is built for small businesses with 1 to 10 employees. If you're an early stage AI company under 5 million ARR, the Startup License at 2500 per month gives you 100 thousand API calls and full governance access. Which one fits your stage?";
+
+        // Bots
+        if (lowerInput.includes('bot') || lowerInput.includes('suite') || lowerInput.includes('buy')) {
+            return "The bots are working products that run locally on your own machine, each with its own local database, tested end to end before listing. Prices run from $750 for QuickFix and the VoIP call tracker, through the VP and suite bots at $1,500, SERE Legacy and A.M.I.R. and the Legal Team Suite at $2,500, and SERE Desktop at $3,500. All fifteen together are $14,900, against $24,350 bought separately. Delivery is automatic after checkout. The full shelf is in the Bots section of this page.";
         }
-        
-        // Enterprise specific
-        if (lowerInput.includes('enterprise') && !lowerInput.includes('license')) {
-            return "Enterprise License at 50 thousand per month gets you the full package—unlimited API calls, 24 7 premium support, dedicated account manager, the works. It's built for Fortune 500 companies and major enterprises where a compliance issue would be a really big deal. If you're at that scale, happy to walk through what's included.";
+
+        // Witness Gate
+        if (lowerInput.includes('witness') || lowerInput.includes('gate') || lowerInput.includes('free') || lowerInput.includes('open source')) {
+            return "The Witness Gate is the free, open-source piece: the same eight-witness judgment gate SoulCradle runs, in stdlib-only Python under Apache-2.0, with 47 passing tests. Code: github.com/MytharaLabsLLC/witness-gate. Run the gate before you ever talk to us.";
         }
-        
-        // On-premise specific
-        if (lowerInput.includes('on-premise') || lowerInput.includes('air-gapped') || lowerInput.includes('government')) {
-            return "If you need everything running on your own infrastructure—like government or defense work where cloud isn't an option—we can do that. It's a bigger setup and costs more, but you get full control. Email us if that's what you need and we can talk through the details.";
+
+        // Startup / small teams
+        if (lowerInput.includes('startup') || lowerInput.includes('small') || lowerInput.includes('seed') || lowerInput.includes('nonprofit')) {
+            return "There are no separate startup or nonprofit tiers. The honest entry points are the Witness Gate, which is free, a single bot from $750, or the Self-Guided pilot at $5,000 for 90 days on your own agent actions. Prices are the same for everyone and they are all on this page.";
         }
-        
-        // Employee count detection
-        const employeeMatch = lowerInput.match(/(\d+)\s*(employee|people|person|team|staff|member)/i);
-        if (employeeMatch) {
-            const count = parseInt(employeeMatch[1]);
-            if (count <= 10) {
-                return "Perfect! With " + count + " employees, Startup Small Teams at 249 per month is your best fit. You get full Global Governance access and same day email support. How many AI agents or models do you need to govern?";
-            } else if (count <= 50) {
-                return "With " + count + " employees, you'd want our Professional Growing Teams tier at 999 per month. You get priority support with 12 hour response, advanced analytics, and dedicated onboarding. How many AI agents or models do you need to govern?";
-            } else {
-                return "With " + count + " employees, you're looking at either Growth License at 10 thousand per month or Enterprise License at 50 thousand per month, depending on your API volume and compliance needs. How many AI agents or models do you need to govern?";
-            }
+
+        // Enterprise
+        if (lowerInput.includes('enterprise')) {
+            return "Enterprise licensing starts at $75,000 per year: annual SoulCradle licensing for enterprise use, with the same sealed record kept in your environment. SERE Enterprise, the fleet direction of SERE, is in development and is not sold yet. Email info@mytharalabs.com to talk through an enterprise engagement.";
         }
-        
-        // AI agent/model count detection
-        const agentMatch = lowerInput.match(/(\d+)\s*(agent|model|bot|ai|system|assistant)/i);
-        if (agentMatch) {
-            const count = parseInt(agentMatch[1]);
-            if (count === 0) {
-                return "Ah, so you're in the planning phase—that's actually the perfect time to think about governance. A lot of companies wait until after they deploy and then realize they have compliance gaps. Are you building AI in house, or integrating third party models like GPT or Claude?";
-            } else if (count === 1) {
-                return "Just one AI agent is perfect for starting out. Our Startup Small Teams tier at 249 per month handles single agent deployments easily. You get 100 validations per day included. Should I send you the API docs to get started?";
-            } else if (count <= 5) {
-                return count + " AI agents—that's a solid setup. Our Startup License or Professional tier can handle that volume. The Startup License at 2500 per month gives you 100 thousand API calls which covers multiple agents nicely. Want to see the integration guide?";
-            } else if (count <= 20) {
-                return count + " AI agents means you need serious API volume. Growth License at 10 thousand per month gives you 1 million API calls per month and unlimited environments. That should cover your multi agent architecture. Should I connect you with our team?";
-            } else {
-                return count + " AI agents is enterprise scale. You'll want our Enterprise License at 50 thousand per month with unlimited API calls and dedicated support. At that scale, compliance gets complex fast. Want to schedule a call with our enterprise team?";
-            }
+
+        // On-premise / air-gapped
+        if (lowerInput.includes('on-premise') || lowerInput.includes('on premise') || lowerInput.includes('air-gapped') || lowerInput.includes('air gapped') || lowerInput.includes('government')) {
+            return "Yes. SoulCradle is delivered software and can run in your cloud, on your servers, or air-gapped. The judgment record is generated and kept in your environment either way. Email info@mytharalabs.com for deployment details.";
         }
-        
-        // Planning stage detection (no agents yet)
-        if ((lowerInput.includes('none') || lowerInput.includes('zero') || lowerInput.includes('not yet') || lowerInput.includes('planning')) && 
-            (lowerInput.includes('agent') || lowerInput.includes('ai') || lowerInput.includes('model'))) {
-            return "Perfect timing—planning governance before you deploy is way smarter than scrambling after launch. Are you building AI in house, or planning to use third party models like GPT, Claude, or Gemini?";
-        }
-        
-        // ARR / Revenue detection
-        const revenueMatch = lowerInput.match(/(\d+)\s*(million|m|k|thousand)/i);
-        if (revenueMatch && (lowerInput.includes('revenue') || lowerInput.includes('arr') || lowerInput.includes('making'))) {
-            const amount = parseFloat(revenueMatch[1]);
-            const unit = revenueMatch[2].toLowerCase();
-            const millions = unit.startsWith('m') ? amount : amount / 1000;
-            
-            if (millions < 5) {
-                return "Under 5 million ARR, the Startup License at 2500 per month is perfect. You get 100 thousand API calls per month and 5 production environments. Should I send you the onboarding details?";
-            } else if (millions < 50) {
-                return "At your revenue level, Growth License at 10 thousand per month makes sense. You get 1 million API calls per month, unlimited users, and priority support. Want to schedule a demo?";
-            } else {
-                return "At your scale, Enterprise License at 50 thousand per month is the right fit. You get unlimited API calls and 24 7 premium support. Should I have our enterprise team reach out?";
-            }
-        }
-        
-        // Email address detection
+
+        // Email address given: this chat cannot take it anywhere
         const emailPattern = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/;
         if (emailPattern.test(lowerInput)) {
-            return "Perfect! I've got your email. Someone from our team will reach out within 24 hours with everything you need to get started. Looking forward to working with you!";
+            return "Thank you. One honest note: this chat does not save or send anything, so I cannot pass that address to the team. Please email info@mytharalabs.com directly and we will answer within 5 business days.";
         }
-        
-        // Yes/No responses
-        if (lowerInput.includes('yes') || lowerInput.includes('sure') || lowerInput.includes('okay') || lowerInput.includes('ok')) {
-            return "Great! Email me at Mythara.Engine@yahoo.com and I'll send you everything you need. What's the best email address to reach you?";
+
+        // Yes
+        if (lowerInput.includes('yes') || lowerInput.includes('sure') || lowerInput.includes('okay')) {
+            return "Great. The fastest routes are the Buy buttons on this page, or email info@mytharalabs.com and we will answer within 5 business days. What else would you like to know?";
         }
-        
-        if (lowerInput.includes('no') || lowerInput.includes('not interested') || lowerInput.includes('no thanks')) {
-            return "No problem! Is there anything else I can help you with? Feel free to ask about pricing, features, or how it works?";
+
+        // No
+        if (lowerInput.includes('no thanks') || lowerInput.includes('not interested')) {
+            return "No problem. The Witness Gate stays free if you ever want to test the system, and the News Network publishes every night. Anything else I can answer?";
         }
-        
-        // Default fallback
+
+        // Short input
         if (lowerInput.length < 3) {
-            return "I need a bit more context. What are you curious about? Pricing? How it works? Something else?";
+            return "I need a bit more context. What are you curious about? Pricing, the bots, the Witness Gate, or how SoulCradle works?";
         }
-        
-        // Intelligent fallback
+
+        // Question fallback
         if (lowerInput.includes('?')) {
-            return "That's a good question. Let me connect you with someone who can give you a proper answer—email Mythara.Engine@yahoo.com and we'll get back to you same day.";
+            return "That one deserves a proper answer from a person. Email info@mytharalabs.com and we will answer within 5 business days. Meanwhile, I can help with pricing, the bots, the Witness Gate, or how SoulCradle works.";
         }
-        
+
         // Final fallback
-        return "Hmm, not totally sure what you're asking. Can you rephrase that? Or ask me something like: what is this, how much does it cost, or how does it work?";
+        return "I am not sure I follow. You can ask me what SoulCradle is, what anything costs, what the bots do, or how the Witness Gate works.";
     }
-    
+
     suggestNextStep(userInput) {
         const lower = userInput.toLowerCase();
         
@@ -597,7 +551,7 @@ class MytharaWidget {
             setTimeout(() => {
                 this.hideTypingIndicator();
                 this.addMessage("Which tier fits your current stage?");
-                this.addQuickReplies(['Startup Small Teams', 'Startup License', 'Growth License']);
+                this.addQuickReplies(['Self-Guided pilot', 'White-Glove pilot', 'See the bots']);
             }, 1000);
         }
         
@@ -606,8 +560,8 @@ class MytharaWidget {
             this.showTypingIndicator();
             setTimeout(() => {
                 this.hideTypingIndicator();
-                this.addMessage("Want to see hypothetical ROI scenarios?");
-                this.addQuickReplies(['Yes, show ROI', 'Show pricing', 'Technical details']);
+                this.addMessage("Want the plain business case instead?");
+                this.addQuickReplies(['Yes, the business case', 'Show pricing', 'Technical details']);
             }, 1000);
         }
     }
@@ -654,8 +608,8 @@ class MytharaWidget {
                 .replace(/#/g, ' number ')
                 .replace(/@/g, ' at ')
                 .replace(/\+/g, ' plus ')
-                .replace(/—/g, ', ') // Long dash = pause (comma)
-                .replace(/–/g, ', ') // En dash = pause (comma)
+                .replace(/, /g, ', ') // Long dash = pause (comma)
+                .replace(/, /g, ', ') // En dash = pause (comma)
                 .replace(/ - /g, ' to ') // Say "to" instead of dash with spaces
                 .replace(/-/g, ' ') // Remove remaining dashes (like tic-tac-toe)
                 .replace(/\.\.\./g, ', ')

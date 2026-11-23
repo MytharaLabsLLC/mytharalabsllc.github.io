@@ -240,11 +240,12 @@
         </div>
         <div class="arch-grid" aria-label="More products on SoulCradle">
           <article class="arch-card">
-            <h3>SERE</h3>
+            <h3>SERE, the training simulation</h3>
             <p>
               A training simulation built on SoulCradle's guarding side: it detects, quarantines,
               profiles, and logs, and its defense is the record itself. Trainees learn to survive,
-              evade, resist, and escape inside the simulation. Status: in development as a training product.
+              evade, resist, and escape inside the simulation. Status: in development. Its triage
+              tool, SERE Legacy, is available now in the bots below.
             </p>
           </article>
           <article class="arch-card">
@@ -270,9 +271,10 @@
           <p class="eyebrow">Bots</p>
           <h2 id="bots-title">Bots, sold individually.</h2>
           <p>
-            Every bot below is a working product that runs on SoulCradle. Each one runs
-            locally on your own machine, keeps its data in its own local database, and was
-            tested end to end before it was listed. One-time license. Delivery is automatic
+            Every bot below is a working product built to the same standard as SoulCradle.
+            Each one runs locally on your own machine, keeps its data in its own local
+            database, and was tested end to end before it was listed. SERE runs standalone
+            by design, built to work offline with no outside dependency. One-time license. Delivery is automatic
             after checkout, and support is by email, answered within 5 business days.
           </p>
         </div>
@@ -605,8 +607,9 @@
             <p>
               SERE keeps the perimeter and the record. It detects, quarantines, profiles, and logs.
               Its defense is the record itself: tamper-evident, hash-chained, and written so that a
-              quiet edit breaks the chain and shows. SERE is a training simulation and a guardian,
-              never a weapon.
+              quiet edit breaks the chain and shows. SERE comes in three directions: Legacy for
+              training and triage, Desktop guarding a single machine, and Enterprise, still in
+              development. In every direction the rule holds: SERE guards, and it never attacks.
             </p>
           </article>
           <article class="arch-card">
@@ -693,7 +696,7 @@
           <h2 id="contact-title">Start with the record.</h2>
           <p>
             For Witness Gate or SoulCradle licensing inquiries, contact Mythara Labs LLC by email,
-            review the company's GitHub, or ask MytharaConnect, the chat at the corner of this page.
+            review the company's GitHub, or ask the chat at the corner of this page.
           </p>
         </div>
         <div class="contact-actions">
@@ -893,16 +896,16 @@
       runCase(0);
     })();
     </script>
-    <!-- MytharaConnect chat widget (Herb's 2025 build: core/static/widget.js) -->
-    <button id="chat-bubble" aria-label="Open chat with MytharaConnect">💬</button>
-    <div id="chat-window" role="dialog" aria-label="MytharaConnect chat">
+    <!-- Mythara site chat widget -->
+    <button id="chat-bubble" aria-label="Open chat with Mythara">💬</button>
+    <div id="chat-window" role="dialog" aria-label="Mythara chat">
       <div class="chat-header">
-        <span>MytharaConnect</span>
+        <span>Mythara</span>
         <button id="chat-close" aria-label="Close chat">×</button>
       </div>
       <div id="progress-tracker"></div>
       <div id="chat-messages"></div>
-      <div id="typing-indicator">MytharaConnect is typing…</div>
+      <div id="typing-indicator">Mythara is typing…</div>
       <div id="quick-replies"></div>
       <div class="chat-input-row">
         <input id="chat-input" type="text" placeholder="Ask about SoulCradle, the Witness Gate, licensing…" aria-label="Type your message">
