@@ -503,3 +503,9 @@ h3 {
 #chat-send:hover { background: var(--teal-dark); }
 #voice-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line); background: #fff; cursor: pointer; font-size: 16px; }
 #voice-btn.listening { background: var(--gold); border-color: var(--gold); color: #fff; }
+
+.delivery-note {
+  font-size: 0.85em;
+  opacity: 0.85;
+  margin-top: 0.5em;
+}
