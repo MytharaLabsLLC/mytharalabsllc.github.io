@@ -474,7 +474,7 @@ class MytharaWidget {
 
         // Proof / Case studies
         if (lowerInput.includes('proof') || lowerInput.includes('case study') || lowerInput.includes('customer') || lowerInput.includes('reference') || lowerInput.includes('news')) {
-            return "The proof is public. The Mythara News Network runs this same system in the open every night: the witnesses judge the day's stories and the print and radio editions are published free for anyone to check against the record. The Witness Gate code and its 47 passing tests are on GitHub. We do not name customers publicly.";
+            return "The proof is public. Mythara News runs this same system in the open every night: the witnesses judge the day's stories and the print and radio editions are published free for anyone to check against the record. The Witness Gate code and its 47 passing tests are on GitHub. We do not name customers publicly.";
         }
 
         // Bots
@@ -515,7 +515,7 @@ class MytharaWidget {
 
         // No
         if (lowerInput.includes('no thanks') || lowerInput.includes('not interested')) {
-            return "No problem. The Witness Gate stays free if you ever want to test the system, and the News Network publishes every night. Anything else I can answer?";
+            return "No problem. The Witness Gate stays free if you ever want to test the system, and Mythara News publishes every night. Anything else I can answer?";
         }
 
         // Short input
