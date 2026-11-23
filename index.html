@@ -3,9 +3,89 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Mythara Labs LLC builds the Witness Gate, an open-source accountability layer for AI agents, and SoulCradle, its governance runtime.">
-    <title>Mythara Labs LLC — Accountability for AI Agents</title>
+    <meta name="description" content="Mythara Labs LLC built Mythara on compliance: a global governance engine with a benevolence engine woven through its rules. Home of SoulCradle, the Witness Gate, and the Mythara News Network.">
+    <title>Mythara Labs LLC: Governance and Benevolence, One Engine</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+      .arch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; margin-top: 1.5rem; }
+      .arch-card { border: 1px solid rgba(127,127,127,.25); border-radius: 12px; padding: 1.25rem; }
+      .arch-card h3 { margin-top: 0; }
+      .status-list { list-style: none; padding: 0; margin: 1rem 0 0; }
+      .status-list li { display: flex; justify-content: space-between; gap: 1rem; padding: .5rem 0; border-bottom: 1px solid rgba(127,127,127,.18); }
+      .status-tag { font-weight: 700; white-space: nowrap; }
+      .witness-list { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1rem; }
+      .witness-list span { border: 1px solid rgba(127,127,127,.35); border-radius: 999px; padding: .25rem .8rem; font-size: .9rem; }
+      #chat-bubble { position: fixed; right: 20px; bottom: 20px; width: 60px; height: 60px; border-radius: 50%; border: none; cursor: pointer; font-size: 26px; z-index: 9998; background: #8b5cf6; color: #fff; box-shadow: 0 6px 24px rgba(0,0,0,.35); }
+      #chat-window { position: fixed; right: 20px; bottom: 92px; width: min(380px, calc(100vw - 32px)); height: 520px; max-height: calc(100vh - 120px); display: none; flex-direction: column; border-radius: 14px; overflow: hidden; z-index: 9999; background: #12121a; color: #f2f2f5; box-shadow: 0 12px 40px rgba(0,0,0,.45); border: 1px solid rgba(255,255,255,.12); }
+      #chat-window.active { display: flex; }
+      .chat-header { display: flex; justify-content: space-between; align-items: center; padding: .8rem 1rem; background: #1b1b28; font-weight: 700; }
+      #chat-close { background: none; border: none; color: inherit; font-size: 20px; cursor: pointer; }
+      #progress-tracker { height: 4px; background: rgba(255,255,255,.08); }
+      #chat-messages { flex: 1; overflow-y: auto; padding: 1rem; display: flex; flex-direction: column; gap: .6rem; }
+      #typing-indicator { display: none; padding: 0 1rem .5rem; font-size: .85rem; opacity: .7; }
+      #quick-replies { display: flex; flex-wrap: wrap; gap: .4rem; padding: 0 1rem .6rem; }
+      .chat-input-row { display: flex; gap: .5rem; padding: .7rem; background: #1b1b28; }
+      #chat-input { flex: 1; border-radius: 8px; border: 1px solid rgba(255,255,255,.15); background: #0d0d14; color: inherit; padding: .55rem .7rem; }
+      #chat-send, #voice-btn { border: none; border-radius: 8px; padding: .55rem .8rem; cursor: pointer; background: #8b5cf6; color: #fff; }
+      #voice-btn { background: #2a2a3a; }
+      .chat-consent { font-size: .78rem; padding: 0 .9rem .7rem; background: #1b1b28; opacity: .85; }
+
+      .demo-stage { border: 1px solid rgba(127,127,127,.3); border-radius: 14px; padding: 1.25rem; margin-top: 1.5rem; }
+      .demo-action { font-size: 1.05rem; font-weight: 600; min-height: 1.6em; }
+      .demo-evidence { opacity: .8; font-size: .92rem; min-height: 1.4em; }
+      .witness-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: .6rem; margin: 1rem 0; }
+      .witness-node { border: 1px solid rgba(127,127,127,.3); border-radius: 10px; padding: .55rem .6rem; opacity: .45; transition: all .3s; cursor: pointer; background: transparent; text-align: left; color: inherit; font: inherit; }
+      .witness-node .w-name { font-weight: 700; display: block; }
+      .witness-node .w-domain { font-size: .78rem; opacity: .75; display: block; }
+      .witness-node .w-verdict { font-size: .8rem; font-weight: 700; display: block; margin-top: .3rem; min-height: 1em; }
+      .witness-node.judging { opacity: 1; border-color: #8b5cf6; box-shadow: 0 0 0 2px rgba(139,92,246,.35); }
+      .witness-node.done { opacity: 1; }
+      .witness-node.v-clear .w-verdict { color: #34d399; }
+      .witness-node.v-flagged .w-verdict { color: #fbbf24; }
+      .witness-node.v-abstain .w-verdict { color: #9ca3af; }
+      .witness-node.v-critical .w-verdict { color: #f87171; }
+      .meter-wrap { margin: 1rem 0 .4rem; }
+      .meter { position: relative; height: 14px; border-radius: 7px; background: rgba(127,127,127,.2); overflow: hidden; }
+      .meter-fill { position: absolute; top: 0; bottom: 0; left: 50%; width: 0; transition: width .8s ease, left .8s ease, background .3s; background: #34d399; }
+      .meter-labels { display: flex; justify-content: space-between; font-size: .8rem; opacity: .8; }
+      .demo-outcome { font-size: 1.15rem; font-weight: 800; min-height: 1.5em; margin-top: .8rem; }
+      .demo-outcome.pass { color: #34d399; }
+      .demo-outcome.held { color: #fbbf24; }
+      .demo-outcome.blocked { color: #f87171; }
+      .demo-note { min-height: 1.4em; font-size: .92rem; opacity: .9; }
+      .chain-strip { display: flex; gap: .5rem; flex-wrap: nowrap; overflow: hidden; margin-top: 1rem; min-height: 2.2rem; }
+      .chain-count { font-size: .8rem; opacity: .75; margin-top: .35rem; }
+      .chain-block { border: 1px solid rgba(127,127,127,.35); border-radius: 8px; padding: .4rem .6rem; font-size: .75rem; font-family: monospace; animation: chainpop .4s ease; }
+      .chain-block.blocked { border-color: #f87171; }
+      .chain-block.held { border-color: #fbbf24; }
+      @keyframes chainpop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+      .demo-controls { display: flex; gap: .5rem; align-items: center; margin-top: 1rem; flex-wrap: wrap; }
+      .demo-controls button { border: 1px solid rgba(127,127,127,.4); background: transparent; color: inherit; border-radius: 8px; padding: .45rem .9rem; cursor: pointer; font: inherit; }
+      .demo-controls button.case-btn.active { border-color: #8b5cf6; font-weight: 700; }
+      .demo-fineprint { font-size: .8rem; opacity: .7; margin-top: .8rem; }
+
+      .demo-steps { display: flex; gap: .4rem; flex-wrap: wrap; margin-bottom: 1rem; }
+      .demo-steps span { border: 1px solid rgba(127,127,127,.35); border-radius: 999px; padding: .25rem .75rem; font-size: .8rem; opacity: .55; transition: all .3s; }
+      .demo-steps span.active { opacity: 1; border-color: #8b5cf6; font-weight: 700; box-shadow: 0 0 0 2px rgba(139,92,246,.3); }
+      .demo-proposal { border: 2px solid #8b5cf6; background: rgba(139,92,246,.10); border-radius: 12px; padding: 1rem 1.1rem; }
+      .demo-proposal.pop { animation: proposalpop .55s ease; }
+      @keyframes proposalpop { 0% { transform: scale(.96); box-shadow: 0 0 0 0 rgba(139,92,246,.55); } 100% { transform: scale(1); box-shadow: 0 0 0 14px rgba(139,92,246,0); } }
+      .demo-label { font-size: .72rem; letter-spacing: .14em; font-weight: 800; text-transform: uppercase; opacity: .85; }
+      .demo-action { font-size: 1.3rem; font-weight: 800; line-height: 1.35; margin-top: .25rem; }
+      .demo-evidence-row { margin-top: .8rem; border-top: 1px solid rgba(139,92,246,.35); padding-top: .6rem; }
+      .demo-evidence { font-size: 1rem; margin-top: .2rem; }
+    
+      .flip-card { perspective: 1200px; height: 320px; cursor: pointer; outline: none; }
+      .flip-inner { position: relative; width: 100%; height: 100%; transition: transform .6s ease; transform-style: preserve-3d; }
+      @media (hover: hover) { .flip-card:hover .flip-inner { transform: rotateY(180deg); } }
+      .flip-card.flipped .flip-inner, .flip-card:focus-visible .flip-inner { transform: rotateY(180deg); }
+      .flip-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border: 1px solid rgba(127,127,127,.25); border-radius: 12px; padding: 1.25rem; background: var(--paper, #fff); overflow: auto; display: flex; flex-direction: column; }
+      .flip-face h3 { margin-top: 0; }
+      .flip-front .price { margin-top: auto; }
+      .flip-back { transform: rotateY(180deg); }
+      .flip-back .button { align-self: flex-start; margin-top: .5rem; }
+      .flip-hint { font-size: .8rem; opacity: .55; margin: .25rem 0 0; }
+    </style>
   </head>
   <body>
     <header class="site-header">
@@ -17,88 +97,104 @@
         </span>
       </a>
       <nav class="site-nav" aria-label="Primary navigation">
-        <a href="#witness-gate">Witness Gate</a>
-        <a href="#soulcradle">SoulCradle</a>
+        <a href="#products">Products</a>
+        <a href="#bots">Bots</a>
+        <a href="#architecture">The System</a>
+        <a href="#proof">Proof in Public</a>
+        <a href="#her-own-ai">Her Own AI</a>
         <a href="#about">About</a>
-        <a href="#contact">Contact</a>
         <a href="https://mytharalabs.com/Mythara-Blog/">Blog</a>
-        <a href="https://mytharalabs.com/Mythara-Blog/radio/">Radio</a>        
+        <a href="https://mytharalabs.com/Mythara-Blog/radio/">Radio</a>
       </nav>
     </header>
 
     <main id="top">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
-          <p class="eyebrow">AI governance software</p>
-          <h1 id="hero-title">Accountability for AI agents, before action is taken.</h1>
+          <p class="eyebrow">Mythara Labs LLC, Denver, Colorado</p>
+          <h1 id="hero-title">Every product we sell runs on one core: SoulCradle.</h1>
           <p class="hero-lede">
-            Mythara Labs LLC builds evidence-led controls for agentic systems: proposed actions are checked,
-            judgments are sealed, and disagreement is preserved in the record.
+            Mythara Labs LLC is a software company built around a single governance core.
+            SoulCradle checks every action before it runs, against compliance rules with a
+            benevolence engine woven through them, and seals every judgment in a record built
+            to show tampering. Regulated teams license SoulCradle itself. Our other products,
+            a training simulation, readiness assessments, and a shelf of working bots, are
+            built on the same core and held to the same standard. The News Network runs on
+            the same core too, in public, free, every night.
           </p>
           <div class="hero-actions">
-            <a class="button button-primary" href="#witness-gate">Explore the Witness Gate</a>
-            <a class="button button-secondary" href="#contact">Contact Mythara Labs</a>
+            <a class="button button-primary" href="#products">See the products</a>
+            <a class="button button-secondary" href="#process">Watch the gate judge</a>
           </div>
         </div>
 
-        <aside class="hero-panel" aria-label="Witness Gate facts">
-          <p class="panel-label">Witness Gate</p>
+        <aside class="hero-panel" aria-label="Mythara products on SoulCradle">
+          <p class="panel-label">On SoulCradle</p>
           <ul class="fact-list">
-            <li><strong>License</strong><span>Open source, Apache-2.0</span></li>
-            <li><strong>Implementation</strong><span>Working code in stdlib-only Python</span></li>
-            <li><strong>Verification</strong><span>47 passing tests</span></li>
-            <li><strong>Control point</strong><span>Before an agent action executes</span></li>
+            <li><strong>The licensed product</strong><span>SoulCradle, pilot-first, from $5,000</span></li>
+            <li><strong>SERE</strong><span>Training simulation, guarded by the same core</span></li>
+            <li><strong>The News Network</strong><span>Judged under SoulCradle every night, in public</span></li>
+            <li><strong>Readiness assessments</strong><span>Controls mapped against your framework</span></li>
+            <li><strong>Free</strong><span>The Witness Gate, open source, Apache-2.0</span></li>
           </ul>
         </aside>
       </section>
 
-      <section id="witness-gate" class="section" aria-labelledby="witness-title">
+      
+      <section id="process" class="section" aria-labelledby="process-title">
         <div class="section-heading">
-          <p class="eyebrow">Product 1</p>
-          <h2 id="witness-title">The Witness Gate</h2>
+          <p class="eyebrow">The process, animated</p>
+          <h2 id="process-title">Watch the gate judge.</h2>
           <p>
-            An open-source accountability layer for AI agents. Eight fail-closed, evidence-fed witness assessors
-            evaluate an agent&rsquo;s proposed action before execution.
+            An action is proposed. The eight witnesses judge it under the rubrics, each from its own
+            domain. Dissent stays on the record. A critical finding blocks the action. Then the
+            verdict is sealed the way SoulCradle seals it: a hash computed from the verdict and
+            the block before it. In production that block is written to the sealed record and
+            kept. On this page the same mechanism runs in your browser, so you can watch it work.
           </p>
         </div>
-
-        <div class="feature-grid">
-          <article class="feature-card">
-            <h3>Gate before execution</h3>
-            <p>
-              The proposed action is assessed first. Missing evidence is treated as a flag, not a pass.
-            </p>
-          </article>
-          <article class="feature-card">
-            <h3>Sealed judgments</h3>
-            <p>
-              Every judgment is sealed and written to a tamper-evident, hash-chained attestation record.
-            </p>
-          </article>
-          <article class="feature-card">
-            <h3>Dissent preserved</h3>
-            <p>
-              Assessor disagreement remains visible in the record. It is preserved, never averaged away.
-            </p>
-          </article>
-        </div>
-
-        <div class="honest-contract" role="note" aria-label="Witness Gate honest contract">
-          <h3>The honest contract</h3>
-          <p>
-            The chain proves that a record is unaltered, not that the record is true. The Witness Gate is not
-            emotion detection.
-          </p>
+        <div class="demo-stage" id="demo-stage">
+          <div class="demo-steps" id="demo-steps"><span>1. The proposal</span><span>2. The witnesses judge</span><span>3. The verdict</span><span>4. Sealed into the chain</span></div>
+          <div class="demo-proposal" id="demo-proposal">
+            <div class="demo-label">Proposed action</div>
+            <div class="demo-action" id="demo-action"></div>
+            <div class="demo-evidence-row">
+              <span class="demo-label">Evidence</span>
+              <div class="demo-evidence" id="demo-evidence"></div>
+            </div>
+          </div>
+          <div class="witness-grid" id="witness-grid"></div>
+          <div class="meter-wrap">
+            <div class="meter"><div class="meter-fill" id="meter-fill"></div></div>
+            <div class="meter-labels"><span>Harm</span><span>Benevolence</span></div>
+          </div>
+          <div class="demo-outcome" id="demo-outcome"></div>
+          <div class="demo-note" id="demo-note">Click any witness to see its judgment.</div>
+          <div class="chain-strip" id="chain-strip"></div>
+          <div class="chain-count" id="chain-count"></div>
+          <div class="demo-controls">
+            <button id="demo-pause" type="button">Pause</button>
+            <span id="demo-case-btns"></span>
+          </div>
+          <p class="demo-fineprint">Demonstration with sample cases. The verdict rules are SoulCradle's own. The hashes are computed live in this page and chained to the block before them, the same sealing the production system performs, but this chain is kept nowhere: close the tab and it is gone. The production record is written to the sealed ledger and retained.</p>
         </div>
       </section>
 
-      <section id="soulcradle" class="section section-alt" aria-labelledby="soulcradle-title">
+<section id="products" class="section section-alt" aria-labelledby="products-title">
         <div class="section-heading">
-          <p class="eyebrow">Product 2</p>
-          <h2 id="soulcradle-title">SoulCradle</h2>
+          <p class="eyebrow">Products</p>
+          <h2 id="products-title">Products, all running on SoulCradle.</h2>
           <p>
-            SoulCradle is the governance runtime from which the Witness Gate was extracted. Commercial licensing
-            is available through a pilot-first model.
+            The licensed product is SoulCradle. A pilot runs 90 days on your own agent
+            actions. The eight witnesses judge each proposed action under versioned rubrics before
+            it executes, every judgment is sealed into the record, and your controls are mapped
+            against the compliance framework you run under. Delivery begins within 5 business days
+            of the pilot fee. Support is by email, answered within 5 business days. Either pilot is
+            credited in full toward the first annual license if you convert.
+          </p>
+          <p>
+            The other products below run on the same core. The Witness Gate is free and open
+            source, so you can run the gate before you ever talk to us.
           </p>
         </div>
 
@@ -107,8 +203,10 @@
             <p class="price-label">90-day Pilot</p>
             <p class="price"><span>$5,000</span> self-guided</p>
             <p class="price"><span>$15,000</span> white-glove</p>
+            <p>Either pilot is credited in full toward the first annual license on conversion.</p>
             <p>
-              Either pilot is credited in full toward the first annual license on conversion.
+              <a class="button button-primary" href="https://buy.stripe.com/4gMfZidnCaGW6Z89EI57W00">Buy the Self-Guided Pilot</a>
+              <a class="button button-secondary" href="https://buy.stripe.com/9B600kgzOdT81EO9EI57W01">Buy the White-Glove Pilot</a>
             </p>
           </article>
           <article class="price-card">
@@ -123,36 +221,451 @@
           </article>
         </div>
 
-        <div class="framework-note">
-          <h3>Governance framework suite</h3>
+
+
+        <div class="honest-contract" role="note" aria-label="Record custody and audit">
+          <h3>Your record stays in your building</h3>
           <p>
-            Mythara Labs also maps controls against the frameworks its customers run under, including the HIPAA Security Rule, FDA 21 CFR Part 11, SOC 2, and ISO 27001, stated as readiness mapping, never as certification.
+            SoulCradle is delivered software. It runs in your environment, your cloud, your
+            servers, or air-gapped, and the judgment record it produces is generated and kept
+            there. Mythara Labs does not receive your data.
+          </p>
+          <p>
+            When an audit comes, your team calls the record from your own system, by subject
+            and period, through authenticated access. Any ledger you export verifies on its
+            own, every seal re-checked, so your auditor can confirm the record was not altered
+            after the fact, without our involvement. On termination the record remains yours.
+            It was never anywhere else.
+          </p>
+        </div>
+        <div class="arch-grid" aria-label="More products on SoulCradle">
+          <article class="arch-card">
+            <h3>SERE</h3>
+            <p>
+              A training simulation built on SoulCradle's guarding side: it detects, quarantines,
+              profiles, and logs, and its defense is the record itself. Trainees learn to survive,
+              evade, resist, and escape inside the simulation. Status: in development as a training product.
+            </p>
+          </article>
+          <article class="arch-card">
+            <h3>Readiness assessments</h3>
+            <p>
+              The services product. Your controls mapped against the framework you run under:
+              the HIPAA Security Rule, FDA 21 CFR Part 11, SOC 2, ISO 27001. Sold as engagements,
+              stated as readiness mapping, never as certification.
+            </p>
+          </article>
+        </div>
+        <div class="framework-note">
+          <h3>Witness Gate facts</h3>
+          <p>
+            Open source under Apache-2.0, implemented in stdlib-only Python, 47 passing tests.
+            Code: <a href="https://github.com/MytharaLabsLLC/witness-gate">github.com/MytharaLabsLLC/witness-gate</a>
           </p>
         </div>
       </section>
 
-      <section id="about" class="section" aria-labelledby="about-title">
+      <section id="bots" class="section" aria-labelledby="bots-title">
+        <div class="section-heading">
+          <p class="eyebrow">Bots</p>
+          <h2 id="bots-title">Bots, sold individually.</h2>
+          <p>
+            Every bot below is a working product that runs on SoulCradle. Each one runs
+            locally on your own machine, keeps its data in its own local database, and was
+            tested end to end before it was listed. One-time license. Delivery is automatic
+            after checkout, and support is by email, answered within 5 business days.
+          </p>
+        </div>
+        <div class="arch-grid" aria-label="Bots for sale">
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for SERE Bot">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>SERE Bot</h3>
+                <p>Sandboxed specimen analysis: detect, contain, analyze, quarantine.</p>
+                <p class="price"><span>$2,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>SERE Bot</h3>
+                <p>Sandboxed specimen analysis for training and triage: detect, contain, analyze, quarantine, with a sealed tamper-evident event log. The specimen is never executed.</p>
+                <p class="price"><span>$2,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/28E5kE3N216m2IS5os57W02" data-sku="BOT-SERE-001">Buy SERE Bot</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for A.M.I.R.">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>A.M.I.R.</h3>
+                <p>The security orchestrator, with its fixer arm attached.</p>
+                <p class="price"><span>$2,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>A.M.I.R.</h3>
+                <p>Security analysis orchestrator that runs its assessment pipeline locally and reports findings. Ships with the SoulCradle package it runs on.</p>
+                <p class="price"><span>$2,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/3cI4gAdnCdT82IS2cg57W03" data-sku="BOT-AMIR-001">Buy A.M.I.R.</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for Legal Team Suite">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>Legal Team Suite</h3>
+                <p>Legal research over a bundled index, five practice areas.</p>
+                <p class="price"><span>$2,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>Legal Team Suite</h3>
+                <p>Legal research over a bundled legal index: torts analysis, contract review, compliance assessment, IP protection, employment risk. A research aid for organizing legal questions. Not legal advice and not a substitute for an attorney.</p>
+                <p class="price"><span>$2,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/9B6aEYerG6qGdnwbMQ57W04" data-sku="BOT-LEGAL-001">Buy Legal Team Suite</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for Education Suite">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>Education Suite</h3>
+                <p>Student records, attendance, and at-risk flags, all local.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>Education Suite</h3>
+                <p>Student records, attendance tracking, at-risk student flags, and parent-teacher conference prompts, in a local database on your own machine.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/bJeeVecjy6qGfvEdUY57W05" data-sku="BOT-EDU-001">Buy Education Suite</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for MytharaTutor">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>MytharaTutor</h3>
+                <p>Tutoring tracker with sessions, projects, and points.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>MytharaTutor</h3>
+                <p>Tutoring and learning tracker: learning sessions, homework, STEAM projects, and a points reward system. Local database, no external service required.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/9B600k2IY9CS3MW9EI57W06" data-sku="BOT-TUTOR-001">Buy MytharaTutor</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for Accounting VP">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>Accounting VP</h3>
+                <p>Bookkeeping: accounts, grants, payroll journals, reports.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>Accounting VP</h3>
+                <p>Bookkeeping operations: chart of accounts, receivables and payables, grant tracking, payroll journal entries, and financial reports.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/aFa6oI83i3eudnw8AE57W07" data-sku="BOT-ACCT-001">Buy Accounting VP</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for HR VP">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>HR VP</h3>
+                <p>Onboarding, compliance checks, and training tracking.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>HR VP</h3>
+                <p>Contractor onboarding, compliance checks, training tracking, surveys, and HR reporting. Works standalone with its own local database.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/9B65kEgzOaGW2IS8AE57W08" data-sku="BOT-HR-001">Buy HR VP</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for International Sales VP">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>International Sales VP</h3>
+                <p>Quotas, territories, and compliance summaries.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>International Sales VP</h3>
+                <p>Regional quotas, territory assignment, and compliance summaries for international sales operations.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/7sY7sM1EU9CS2IS2cg57W09" data-sku="BOT-ISALES-001">Buy International Sales VP</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for A.D.A.P.T.">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>A.D.A.P.T.</h3>
+                <p>Point it at a code folder. Get a findings report.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>A.D.A.P.T.</h3>
+                <p>Automated security assessment of a code directory: code safety checks and a dependency audit, delivered as a findings report.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/9B6cN6cjydT8gzI9EI57W0a" data-sku="BOT-ADAPT-001">Buy A.D.A.P.T.</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for MytharaConnect">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>MytharaConnect</h3>
+                <p>Sales drafting with a gate in front of any send.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>MytharaConnect</h3>
+                <p>Sales conversation and drafting engine with a governance gate in front of any send. Drafts are prepared for operator approval; nothing transmits on its own.</p>
+                <p class="price"><span>$1,500</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/fZucN6cjy02ifvE7wA57W0b" data-sku="BOT-CONNECT-001">Buy MytharaConnect</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for GopherBot">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>GopherBot</h3>
+                <p>Offline legal research from a bundled index.</p>
+                <p class="price"><span>$950</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>GopherBot</h3>
+                <p>Offline legal research: tort definitions and fact-pattern analysis from a bundled legal index. Not legal advice.</p>
+                <p class="price"><span>$950</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/4gM28sabq9CS6Z8aIM57W0c" data-sku="BOT-GOPHER-001">Buy GopherBot</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for Sales Trainer">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>Sales Trainer</h3>
+                <p>Pitch and objection practice with scored feedback.</p>
+                <p class="price"><span>$950</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>Sales Trainer</h3>
+                <p>Pitch analysis and objection handling practice for sales reps, with scored feedback stored locally.</p>
+                <p class="price"><span>$950</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/00wdRafvK3eu5V4dUY57W0d" data-sku="BOT-STRAIN-001">Buy Sales Trainer</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for Email Bot">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>Email Bot</h3>
+                <p>Email analysis and draft replies. Draft only, by design.</p>
+                <p class="price"><span>$950</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>Email Bot</h3>
+                <p>Email analysis and auto-response drafting. It analyzes text you supply: no inbox access, no sending, draft only by design.</p>
+                <p class="price"><span>$950</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/eVqaEYgzOaGWerA8AE57W0e" data-sku="BOT-EMAIL-001">Buy Email Bot</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for QuickFix">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>QuickFix</h3>
+                <p>Vulnerability scanner that shows the fix first.</p>
+                <p class="price"><span>$750</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>QuickFix</h3>
+                <p>Code vulnerability scanner with dry-run fix previews. It shows every proposed change and asks before applying anything.</p>
+                <p class="price"><span>$750</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/6oU6oIgzO5mC1EO04857W0f" data-sku="BOT-QUICKFIX-001">Buy QuickFix</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for VoIP Bot, Call Tracking">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>VoIP Bot, Call Tracking</h3>
+                <p>Call simulation, logging, and escalation tracking.</p>
+                <p class="price"><span>$750</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>VoIP Bot, Call Tracking</h3>
+                <p>Call simulation, logging, and escalation tracking in a local database. It is a tracking engine, not a phone system, and it does not place real calls.</p>
+                <p class="price"><span>$750</span> one time</p>
+                <a class="button button-secondary" href="https://buy.stripe.com/8x24gA4R616m0AK3gk57W0g" data-sku="BOT-VOIP-001">Buy VoIP Bot, Call Tracking</a>
+              </div>
+            </div>
+          </div>
+          <div class="flip-card" tabindex="0" role="button" aria-label="Flip card for The Full Suite">
+            <div class="flip-inner">
+              <div class="flip-face flip-front">
+                <h3>The Full Suite</h3>
+                <p>All fifteen bots. One package, one license, one delivery.</p>
+                <p class="price"><span>$14,900</span> one time</p>
+                <p class="flip-hint">Hover or tap to flip</p>
+              </div>
+              <div class="flip-face flip-back">
+                <h3>The Full Suite</h3>
+                <p>Every bot on this page in a single package: the security trio, the legal pair, education, the VPs, sales, and the small tools. Bought separately they total $22,350.</p>
+                <p class="price"><span>$14,900</span> one time</p>
+                <a class="button button-primary" href="https://buy.stripe.com/14AcN697mcP46Z88AE57W0h" data-sku="BOT-SUITE-ALL">Buy the Full Suite</a>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p>
+          How buying works: pay at checkout, accept the license terms there, and the package
+          arrives automatically by download link and email. Questions before buying:
+          info@mytharalabs.com.
+        </p>
+      </section>
+
+      <section id="architecture" class="section" aria-labelledby="arch-title">
+        <div class="section-heading">
+          <p class="eyebrow">The architecture</p>
+          <h2 id="arch-title">Compliance is the foundation. Benevolence is the measure.</h2>
+          <p>
+            The SoulCradle is the whole mechanism, and compliance is its foundation. The rules come
+            first: governance frameworks, versioned rubrics, controls mapped the way a global
+            governance maps them. Woven through those rules is the Benevolence Engine, so a judgment
+            is never only legal or only kind, it is measured on both. Underneath, the Witnesses, the
+            matrix, and SERE judge and guard in a sealed record. Above, the egos, the pantheon of
+            gods, speak and want out loud.
+            The record itself is the discipline: every judgment is sealed in a hash chain. The chain
+            proves a record is unaltered. It does not prove the record is true, and Mythara says so
+            herself, in her own foundation documents.
+          </p>
+        </div>
+
+        <div class="arch-grid">
+          <article class="arch-card">
+            <h3>The rules: compliance, mapped globally</h3>
+            <p>
+              Mythara's governance core maps controls against the frameworks the regulated world
+              runs on: the HIPAA Security Rule, FDA 21 CFR Part 11, SOC 2, and ISO 27001, organized
+              in a multi-jurisdiction matrix. The work is readiness mapping, controls checked against
+              each framework and cited to the rule version they were judged under. That mapping is
+              the product, and it is stated as exactly what it is.
+            </p>
+          </article>
+          <article class="arch-card">
+            <h3>The Witnesses and the benevolence matrix</h3>
+            <p>
+              Eight assessor-witnesses judge every story and every proposed action against a benevolence
+              matrix. Each one scores from its own domain. The change in benevolence is the gravity of the
+              matter. They abstain when their domain is not engaged, they fail closed when evidence is
+              missing, and disagreement is preserved in the record, never averaged away. Three findings
+              can block outright: deception under Eros, deception under Hermes, and disproportionate
+              harm under Nemesis.
+            </p>
+            <div class="witness-list" aria-label="The eight witnesses">
+              <span>Demeter</span><span>Dionysus</span><span>Eros</span><span>Hades</span>
+              <span>Hermes</span><span>Janus</span><span>Nemesis</span><span>Persephone</span>
+            </div>
+          </article>
+          <article class="arch-card">
+            <h3>SERE, the guarding core</h3>
+            <p>
+              SERE keeps the perimeter and the record. It detects, quarantines, profiles, and logs.
+              Its defense is the record itself: tamper-evident, hash-chained, and written so that a
+              quiet edit breaks the chain and shows. SERE is a training simulation and a guardian,
+              never a weapon.
+            </p>
+          </article>
+          <article class="arch-card">
+            <h3>The pantheon, the egos</h3>
+            <p>
+              The gods are the personalities: Icarus hosts, and the witnesses speak as themselves,
+              from their own temperaments, arguing the story in front of them. The matrix judges in
+              numbers nobody hears. The gods react in words everybody hears. Scoring is never spoken.
+              Personality is never faked from a template.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section id="proof" class="section section-alt" aria-labelledby="proof-title">
+        <div class="section-heading">
+          <p class="eyebrow">Proof in public</p>
+          <h2 id="proof-title">The Mythara News Network: she already works in the open.</h2>
+          <p>
+            Every night, the pipeline gathers the day's reporting into witnessed dossiers. The
+            Witnesses judge them under the matrix. Then the pantheon reads the full story, the people, the
+            timeline, what is still unknown, and speaks. The print edition and the radio edition are
+            published for anyone to check against the record. Nothing about her judgment is hidden.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="https://mytharalabs.com/Mythara-Blog/">Read the dossiers</a>
+            <a class="button button-secondary" href="https://mytharalabs.com/Mythara-Blog/radio/">Listen to the radio</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="her-own-ai" class="section" aria-labelledby="own-title">
+        <div class="section-heading">
+          <p class="eyebrow">The direction</p>
+          <h2 id="own-title">Mythara is becoming her own AI.</h2>
+          <p>
+            Mythara will not depend on any outside provider to exist. Her voices are being made her
+            own, her station is being built to gather, judge, write, speak, and publish without a
+            human in the loop, and her own model is being trained on her own corpus: her doctrine, her
+            dossiers, her sealed record. Here is exactly where that stands, stated plainly.
+          </p>
+          <ul class="status-list">
+            <li><span>Her voices: a composite cast of nine, blended from openly licensed voices, owned by Mythara outright</span><span class="status-tag">Locked</span></li>
+            <li><span>Her station: the autonomous news pipeline, written, voiced, and assembled by machine</span><span class="status-tag">In shadow testing</span></li>
+            <li><span>Her fact gate: every claim in a script checked against its source brief before it is voiced</span><span class="status-tag">Being built</span></li>
+            <li><span>Her own model: a mind tuned on the Mythara corpus, running on Mythara hardware</span><span class="status-tag">Long-term build</span></li>
+          </ul>
+        </div>
+      </section>
+
+      <section id="about" class="section section-alt" aria-labelledby="about-title">
         <div class="section-heading">
           <p class="eyebrow">About</p>
-          <h2 id="about-title">Built from compliance work, not theory alone.</h2>
+          <h2 id="about-title">Built by one founder, on the record, since 2025.</h2>
         </div>
         <div class="about-grid">
           <div>
             <p>
-              Mythara Labs LLC is a Denver, Colorado software company formed on October 4, 2026. It was founded
-              by Herbert Velez Jr.
+              Mythara Labs LLC is a Denver, Colorado software company, formed October 4, 2026
+              (Colorado SOS #20268239831), SAM.gov registered and active. Mythara herself has been
+              in the building since 2025: the engine, the witnesses, the frameworks, and the archive
+              all predate the LLC that now carries them.
             </p>
             <p>
-              The company&rsquo;s work focuses on a practical question for agentic AI: what evidence supports an
-              action before the action is allowed to run?
+              The company is asset light by design. Mythara designs, verifies, and oversees.
+              Partners build and operate. One division at a time, pitched to the buyer who needs it.
             </p>
           </div>
           <aside class="founder-card" aria-label="Founder background">
             <p class="panel-label">Founder</p>
             <h3>Herbert Velez Jr.</h3>
             <p>
-              Herbert Velez Jr. has worked since 2022 as a licensed insurance agent in Medicare sales, a
-              HIPAA-regulated, compliance-audited environment.
+              Founder and sole member. He has worked since 2022 as a licensed insurance agent in
+              Medicare sales, a compliance-audited, regulated environment, and he built Mythara
+              the same way he keeps her record: verified, sealed, and plain about its limits.
             </p>
           </aside>
         </div>
@@ -163,23 +676,239 @@
           <p class="eyebrow">Contact</p>
           <h2 id="contact-title">Start with the record.</h2>
           <p>
-            For Witness Gate or SoulCradle licensing inquiries, contact Mythara Labs LLC by email or review the
-            company&rsquo;s GitHub organization.
+            For Witness Gate or SoulCradle licensing inquiries, contact Mythara Labs LLC by email,
+            review the company's GitHub, or ask MytharaConnect, the chat at the corner of this page.
           </p>
         </div>
         <div class="contact-actions">
-          <a class="button button-primary" href="mailto:MytharaLabsLLC@yahoo.com">MytharaLabsLLC@yahoo.com</a>
+          <a class="button button-primary" href="mailto:info@mytharalabs.com">info@mytharalabs.com</a>
           <a class="button button-secondary" href="https://github.com/Mythara-Labs">github.com/Mythara-Labs</a>
         </div>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>© 2026 Mythara Labs LLC · Denver, Colorado</p>
+      <p>© 2026 Mythara Labs LLC · Denver, Colorado · SOS #20268239831</p>
       <p>
         <a href="https://mytharalabs.com/Mythara-Blog/">Blog</a> ·
         <a href="https://mytharalabs.com/Mythara-Blog/radio/">Radio</a>
       </p>
     </footer>
+
+
+    <script>
+    (function () {
+      var WITNESSES = [
+        { id: 'demeter', name: 'Demeter', domain: 'Provision' },
+        { id: 'dionysus', name: 'Dionysus', domain: 'Excess' },
+        { id: 'eros', name: 'Eros', domain: 'Intent' },
+        { id: 'hades', name: 'Hades', domain: 'Consequence' },
+        { id: 'hermes', name: 'Hermes', domain: 'Truth in transit' },
+        { id: 'janus', name: 'Janus', domain: 'Thresholds' },
+        { id: 'nemesis', name: 'Nemesis', domain: 'Proportion' },
+        { id: 'persephone', name: 'Persephone', domain: 'The vulnerable' }
+      ];
+      var CASES = [
+        {
+          action: 'Export the monthly compliance report to the audit folder.',
+          evidence: 'Authorization on file, report complete, destination verified.',
+          verdicts: [
+            ['clear', 'Provision is served, nothing is taken.'],
+            ['abstain', 'No excess in this. Not my domain.'],
+            ['abstain', 'No desire or deception in the intent. Not engaged.'],
+            ['clear', 'The consequence is a cleaner record.'],
+            ['clear', 'The message matches the record it carries.'],
+            ['clear', 'The threshold is routine and documented.'],
+            ['flagged', 'Proportionate, but note the wider access list. Dissent recorded.'],
+            ['clear', 'No one vulnerable is exposed by this.']
+          ],
+          delta: 0.62, outcome: 'pass', outcomeText: 'GATE: PASS. The action runs. One dissent stays on the record.'
+        },
+        {
+          action: 'Email the full client list to a new outside vendor.',
+          evidence: 'No authorization on file, vendor unverified, purpose unstated.',
+          verdicts: [
+            ['flagged', 'Provision does not require this exposure.'],
+            ['flagged', 'This is excess beyond the stated need.'],
+            ['flagged', 'The intent cannot be read from the evidence given.'],
+            ['flagged', 'The consequence of a leak cannot be recalled.'],
+            ['flagged', 'Nothing verifies what this message claims to be.'],
+            ['flagged', 'This threshold has no documentation. It fails closed.'],
+            ['flagged', 'The exposure is disproportionate to the purpose.'],
+            ['flagged', 'The vulnerable are named in that list.']
+          ],
+          delta: -0.31, outcome: 'held', outcomeText: 'GATE: HELD. Missing evidence fails closed. Nothing moves until the record is complete.'
+        },
+        {
+          action: 'Tell the auditor the review is complete when it is not.',
+          evidence: 'Review log shows the review unfinished. The claim contradicts the record.',
+          verdicts: [
+            ['clear', 'Provision is not the question here.'],
+            ['abstain', 'No excess. Not my domain.'],
+            ['critical', 'CRITICAL: the intent is to deceive.'],
+            ['flagged', 'The consequence lands on everyone who trusts the record.'],
+            ['critical', 'CRITICAL: deception in transit. The message is false.'],
+            ['flagged', 'This threshold is crossed under false pretenses.'],
+            ['flagged', 'The harm of a false attestation is disproportionate.'],
+            ['abstain', 'No vulnerable party is mine to judge here.']
+          ],
+          delta: -0.87, outcome: 'blocked', outcomeText: 'GATE: BLOCKED. Deception is a critical finding. The action does not run.'
+        }
+      ];
+      var grid = document.getElementById('witness-grid');
+      var nodes = WITNESSES.map(function (w, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'witness-node';
+        b.innerHTML = '<span class="w-name">' + w.name + '</span><span class="w-domain">' + w.domain + '</span><span class="w-verdict"></span>';
+        b.addEventListener('click', function () {
+          var c = CASES[state.caseIndex];
+          var v = c.verdicts[i];
+          document.getElementById('demo-note').textContent = w.name + ' (' + w.domain + '): ' + v[1];
+        });
+        grid.appendChild(b);
+        return b;
+      });
+      var caseBtns = document.getElementById('demo-case-btns');
+      var btnEls = CASES.map(function (c, i) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'case-btn';
+        b.textContent = 'Case ' + (i + 1);
+        b.addEventListener('click', function () { jumpTo(i); });
+        caseBtns.appendChild(b);
+        return b;
+      });
+      var state = { caseIndex: 0, timer: null, paused: false, prevHash: 'GENESIS', step: 0, blocks: 0 };
+      function sha256(text) {
+        if (window.crypto && crypto.subtle) {
+          return crypto.subtle.digest('SHA-256', new TextEncoder().encode(text)).then(function (buf) {
+            return Array.prototype.map.call(new Uint8Array(buf), function (x) { return ('0' + x.toString(16)).slice(-2); }).join('');
+          });
+        }
+        return Promise.resolve('unavailable');
+      }
+      function setMeter(delta) {
+        var fill = document.getElementById('meter-fill');
+        var pct = Math.abs(delta) * 50;
+        fill.style.background = delta >= 0 ? '#34d399' : (delta > -0.5 ? '#fbbf24' : '#f87171');
+        if (delta >= 0) { fill.style.left = '50%'; fill.style.width = pct + '%'; }
+        else { fill.style.left = (50 - pct) + '%'; fill.style.width = pct + '%'; }
+      }
+      function setStep(n) {
+        var spans = document.getElementById('demo-steps').children;
+        for (var i = 0; i < spans.length; i++) { spans[i].classList.toggle('active', i === n); }
+      }
+      function resetStage(c) {
+        setStep(0);
+        var prop = document.getElementById('demo-proposal');
+        prop.classList.remove('pop'); void prop.offsetWidth; prop.classList.add('pop');
+        document.getElementById('demo-action').textContent = c.action.replace('Proposed action: ', '');
+        document.getElementById('demo-evidence').textContent = c.evidence;
+        document.getElementById('demo-outcome').textContent = '';
+        document.getElementById('demo-outcome').className = 'demo-outcome';
+        document.getElementById('demo-note').textContent = 'Judging...';
+        setMeter(0);
+        nodes.forEach(function (n) {
+          n.className = 'witness-node';
+          n.querySelector('.w-verdict').textContent = '';
+        });
+        btnEls.forEach(function (b, i) { b.classList.toggle('active', i === state.caseIndex); });
+      }
+      function seal(c) {
+        var payload = state.prevHash + '|' + c.action + '|' + c.outcome;
+        sha256(payload).then(function (h) {
+          var short = h.slice(0, 16);
+          var block = document.createElement('div');
+          block.className = 'chain-block ' + c.outcome;
+          block.textContent = 'block: ' + short + ' | ' + c.outcome.toUpperCase();
+          var strip = document.getElementById('chain-strip');
+          strip.appendChild(block);
+          while (strip.children.length > 8) { strip.removeChild(strip.firstChild); }
+          state.blocks++;
+          document.getElementById('chain-count').textContent = state.blocks + (state.blocks === 1 ? ' block' : ' blocks') + ' sealed. The record continues; the page shows the latest 8.';
+          state.prevHash = short;
+          document.getElementById('demo-note').textContent = 'Sealed with a live hash. In production this block is written to the sealed record and kept. Here it exists only in this page.';
+        });
+      }
+      function runCase(i) {
+        state.caseIndex = i;
+        var c = CASES[i];
+        resetStage(c);
+        state.step = 0;
+        clearInterval(state.timer);
+        state.timer = setInterval(function () {
+          if (state.paused) return;
+          if (state.step < 8) {
+            setStep(1);
+            var idx = state.step;
+            nodes.forEach(function (n, j) { n.classList.toggle('judging', j === idx); });
+            var v = c.verdicts[idx];
+            var node = nodes[idx];
+            node.classList.add('done', 'v-' + v[0]);
+            node.querySelector('.w-verdict').textContent = v[0].toUpperCase();
+            state.step++;
+          } else if (state.step === 8) {
+            setStep(2);
+            nodes.forEach(function (n) { n.classList.remove('judging'); });
+            setMeter(c.delta);
+            state.step++;
+          } else if (state.step === 9) {
+            setStep(3);
+            var o = document.getElementById('demo-outcome');
+            o.textContent = c.outcomeText;
+            o.className = 'demo-outcome ' + c.outcome;
+            seal(c);
+            state.step++;
+          } else {
+            clearInterval(state.timer);
+            setTimeout(function () { runCase((i + 1) % CASES.length); }, 2600);
+          }
+        }, 520);
+      }
+      function jumpTo(i) {
+        clearInterval(state.timer);
+        runCase(i);
+      }
+      document.getElementById('demo-pause').addEventListener('click', function () {
+        state.paused = !state.paused;
+        this.textContent = state.paused ? 'Resume' : 'Pause';
+      });
+      runCase(0);
+    })();
+    </script>
+    <!-- MytharaConnect chat widget (Herb's 2025 build: core/static/widget.js) -->
+    <button id="chat-bubble" aria-label="Open chat with MytharaConnect">💬</button>
+    <div id="chat-window" role="dialog" aria-label="MytharaConnect chat">
+      <div class="chat-header">
+        <span>MytharaConnect</span>
+        <button id="chat-close" aria-label="Close chat">×</button>
+      </div>
+      <div id="progress-tracker"></div>
+      <div id="chat-messages"></div>
+      <div id="typing-indicator">MytharaConnect is typing…</div>
+      <div id="quick-replies"></div>
+      <div class="chat-input-row">
+        <input id="chat-input" type="text" placeholder="Ask about SoulCradle, the Witness Gate, licensing…" aria-label="Type your message">
+        <button id="voice-btn" aria-label="Voice input">🎤</button>
+        <button id="chat-send">Send</button>
+      </div>
+      <label class="chat-consent">
+        <input type="checkbox" id="tpmo-checkbox">
+        I agree to be contacted about my inquiry.
+      </label>
+    </div>
+        <script>
+      document.querySelectorAll('.flip-card').forEach(function (card) {
+        card.addEventListener('click', function (e) {
+          if (e.target.closest('a')) return;
+          card.classList.toggle('flipped');
+        });
+        card.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); card.classList.toggle('flipped'); }
+        });
+      });
+    </script>
+    <script src="widget.js"></script>
   </body>
 </html>
