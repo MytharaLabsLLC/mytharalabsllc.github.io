@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mythara, The Whole System · Mythara Labs LLC</title>
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#050b18;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:#eef3fb; }
+  #scene { position:fixed; inset:0; }
+  canvas { display:block; }
+  .panel { position:fixed; z-index:5; background:rgba(8,16,34,.85); border:1px solid rgba(150,175,220,.35);
+    border-radius:12px; backdrop-filter: blur(6px); }
+  #title { top:14px; left:14px; padding:10px 14px; max-width:min(440px, 86vw); }
+  #title h1 { margin:0; font-size:19px; letter-spacing:.05em; }
+  #title p { margin:4px 0 0; font-size:12.5px; line-height:1.45; color:#a9bede; }
+  #verdict { top:14px; right:14px; padding:10px 16px; text-align:center; min-width:150px; }
+  #verdict .label { font-size:10.5px; letter-spacing:.14em; color:#a9bede; }
+  #verdict .value { font-size:21px; font-weight:700; margin-top:2px; }
+  #verdict .action { font-size:12px; color:#a9bede; margin-top:2px; }
+  #info { left:14px; bottom:76px; padding:10px 14px; max-width:min(440px, 86vw); }
+  #info .name { font-size:15px; font-weight:700; letter-spacing:.04em; }
+  #info .domain { font-size:12.5px; color:#a9bede; margin-top:2px; line-height:1.45; }
+  #controls { bottom:14px; left:50%; transform:translateX(-50%); padding:8px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:96vw; }
+  button { appearance:none; border:1px solid rgba(150,175,220,.5); background:rgba(18,38,74,.88); color:#eef3fb;
+    font-size:13px; font-weight:600; padding:9px 13px; border-radius:999px; cursor:pointer; }
+  button:hover, button:active { background:rgba(30,58,110,.95); }
+  button small { display:block; font-weight:400; font-size:10.5px; color:#a9bede; }
+  button.wide { border-color:rgba(201,214,238,.8); }
+  #hint { position:fixed; z-index:5; right:14px; bottom:76px; font-size:11.5px; color:#7e93b8; text-align:right; }
+  @media (max-width:640px){ #hint{ display:none; } #info{ bottom:132px; } }
+</style>
+</head>
+<body>
+<div id="scene"></div>
+
+<div class="panel" id="title">
+  <h1>MYTHARA · THE WHOLE SYSTEM</h1>
+  <p>One business, built in modules. Compliance is the foundation. SoulCradle, the court at the center, judges every consequential action and seals the verdict. SERE guards the walls. The bots dock outside and answer to the court. Tap any module to inspect it.</p>
+</div>
+
+<div class="panel" id="verdict">
+  <div class="label">LAST VERDICT</div>
+  <div class="value" id="verdictValue" style="color:#a9c3ea;">WAITING</div>
+  <div class="action" id="verdictAction">no action proposed yet</div>
+</div>
+
+<div class="panel" id="info">
+  <div class="name" id="infoName">The Whole Machine</div>
+  <div class="domain" id="infoDomain">Every module is real, separate, and connected by design. Live modules glow silver-blue. The dark blocks at the back are held back on purpose, and tapping them says why.</div>
+</div>
+
+<div id="hint">drag · orbit<br>scroll · zoom<br>tap a module · inspect it</div>
+
+<div class="panel" id="controls">
+  <button id="btnClear">Clean refund<small>from QuickFix dock</small></button>
+  <button id="btnHeld">Refund, no consent<small>from Email Bot dock</small></button>
+  <button id="btnBlocked">Deceptive charge<small>from Sales Trainer dock</small></button>
+  <button id="btnExplode" class="wide">Explode view<small>pull the machine apart</small></button>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+} }
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const VERDICT_COLORS = { clear:0x35d07f, held:0xf5b83d, blocked:0xef4444 };
+const SILVER = 0x9db9dd, STEEL = 0x24466e;
+
+const container = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ antialias:true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+container.appendChild(renderer.domElement);
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x050b18);
+scene.fog = new THREE.Fog(0x050b18, 45, 95);
+
+const camera = new THREE.PerspectiveCamera(46, window.innerWidth/window.innerHeight, 0.1, 200);
+camera.position.set(0, 17, 33);
+
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.06;
+controls.maxPolarAngle = Math.PI * 0.52;
+controls.minDistance = 8; controls.maxDistance = 60;
+controls.target.set(0, 2, 0);
+
+scene.add(new THREE.AmbientLight(0x4a628f, 0.95));
+const key = new THREE.DirectionalLight(0xffffff, 1.15);
+key.position.set(10, 20, 8); scene.add(key);
+
+// ---------- helpers ----------
+const hitMeshes = [];
+function registerHit(root, title, body){
+  root.traverse(o => { if (o.isMesh) { o.userData.info = { title, body }; hitMeshes.push(o); } });
+}
+function labelSprite(name, sub, scale){
+  const c = document.createElement('canvas'); c.width = 512; c.height = sub ? 160 : 110;
+  const g = c.getContext('2d');
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.shadowColor = 'rgba(160,190,230,0.9)'; g.shadowBlur = 16;
+  g.fillStyle = '#eef3fb';
+  g.font = '700 46px system-ui, sans-serif';
+  g.fillText(name, 256, sub ? 52 : 55);
+  if (sub) { g.font = '400 36px system-ui, sans-serif'; g.fillStyle = '#a9c3ea'; g.fillText(sub, 256, 112); }
+  const tex = new THREE.CanvasTexture(c);
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true }));
+  const s = scale || 3.4;
+  spr.scale.set(s, s * (sub ? 0.3125 : 0.215), 1);
+  return spr;
+}
+const explodables = [];
+function makeExplodable(obj, dir){
+  obj.userData.basePos = obj.position.clone();
+  obj.userData.explodeDir = dir;
+  explodables.push(obj);
+}
+function ringPos(R, deg){
+  const a = deg * Math.PI / 180;
+  return new THREE.Vector3(Math.sin(a) * R, 0, Math.cos(a) * R);
+}
+
+// ---------- foundation: compliance ----------
+const slab = new THREE.Mesh(
+  new THREE.CylinderGeometry(19.5, 20.5, 0.8, 72),
+  new THREE.MeshStandardMaterial({ color:0x0a1428, roughness:0.9, metalness:0.3 })
+);
+slab.position.y = -0.4; scene.add(slab);
+[17.8, 15.6, 12.9].forEach((R, i) => {
+  const thread = new THREE.Mesh(
+    new THREE.TorusGeometry(R, 0.035, 8, 100),
+    new THREE.MeshStandardMaterial({ color:0x16283f, emissive:0x5f7ea6, emissiveIntensity:0.55 - i * 0.12 })
+  );
+  thread.rotation.x = Math.PI/2; thread.position.y = 0.02; scene.add(thread);
+});
+const slabLabel = labelSprite('COMPLIANCE', 'the foundation', 4.2);
+slabLabel.position.set(0, 1.1, 19.2); scene.add(slabLabel);
+registerHit(slab, 'Compliance · The Foundation',
+  'Mythara was built on compliance first: versioned rubrics, framework mapping across the regimes a customer runs under, readiness mapping that never claims to be certification. The Benevolence Engine is woven through these rules, it does not replace them. Everything in this model stands on this slab.');
+
+// ---------- the court: SoulCradle ----------
+const court = new THREE.Group(); scene.add(court);
+makeExplodable(court, new THREE.Vector3(0, 2.4, 0));
+const courtBase = new THREE.Mesh(
+  new THREE.CylinderGeometry(6.4, 6.8, 0.35, 64),
+  new THREE.MeshStandardMaterial({ color:0x0d1830, roughness:0.85, metalness:0.25 })
+);
+courtBase.position.y = 0.18; court.add(courtBase);
+const rim = new THREE.Mesh(
+  new THREE.TorusGeometry(6.4, 0.045, 10, 90),
+  new THREE.MeshStandardMaterial({ color:0x16283f, emissive:0x9fb8d8, emissiveIntensity:0.9 })
+);
+rim.rotation.x = Math.PI/2; rim.position.y = 0.36; court.add(rim);
+
+const coreGroup = new THREE.Group(); coreGroup.position.y = 2.05; court.add(coreGroup);
+const coreMat = new THREE.MeshStandardMaterial({ color:0x10233f, emissive:0x7fa8d8, emissiveIntensity:0.85, roughness:0.3, metalness:0.4 });
+const core = new THREE.Mesh(new THREE.IcosahedronGeometry(1.15, 0), coreMat);
+coreGroup.add(core);
+const coreWire = new THREE.Mesh(
+  new THREE.IcosahedronGeometry(1.45, 1),
+  new THREE.MeshBasicMaterial({ color:0xc7d6ee, wireframe:true, transparent:true, opacity:0.35 })
+);
+coreGroup.add(coreWire);
+const coreLight = new THREE.PointLight(0x9db9dd, 40, 22); coreGroup.add(coreLight);
+registerHit(coreGroup, 'The Sealed Record',
+  'Every verdict lands here: a hash-chained, tamper-evident record of what was proposed, how each witness judged it, and what was decided. The record stays in the customer\'s building. The chain proves it was not quietly rewritten.');
+
+const WITNESSES = [
+  { name:'DEMETER',    domain:'Judges whether the action sustains over the long term, or spends tomorrow to pay for today.' },
+  { name:'DIONYSUS',   domain:'Judges variance and repetition: is it still safe when it happens ten thousand times?' },
+  { name:'EROS',       domain:'Judges deception and hidden motive. Deception found here blocks outright. No override.' },
+  { name:'HADES',      domain:'Judges hidden costs and what cannot be undone once it is done.' },
+  { name:'HERMES',     domain:'Judges disclosure and honest dealing. Deception found here blocks outright. No override.' },
+  { name:'JANUS',      domain:'Judges precedent, and whether the action contradicts commitments already made.' },
+  { name:'NEMESIS',    domain:'Judges disproportionate harm. Harm out of proportion blocks outright. No override.' },
+  { name:'PERSEPHONE', domain:'Judges whether the action strengthens or damages the relationships it touches.' },
+];
+const pillars = [];
+const pillarGeo = new THREE.BoxGeometry(0.72, 3.1, 0.72);
+const capGeo = new THREE.BoxGeometry(0.86, 0.22, 0.86);
+WITNESSES.forEach((w, i) => {
+  const a = (i / WITNESSES.length) * Math.PI * 2;
+  const grp = new THREE.Group();
+  grp.position.set(Math.cos(a) * 4.7, 0.35, Math.sin(a) * 4.7);
+  grp.lookAt(0, 0.35, 0);
+  const mat = new THREE.MeshStandardMaterial({ color:0x1a2c47, roughness:0.55, metalness:0.35, emissive:STEEL, emissiveIntensity:0.25 });
+  const body = new THREE.Mesh(pillarGeo, mat); body.position.y = 1.55; grp.add(body);
+  const capMat = new THREE.MeshStandardMaterial({ color:STEEL, emissive:SILVER, emissiveIntensity:0.7 });
+  const cap = new THREE.Mesh(capGeo, capMat); cap.position.y = 3.2; grp.add(cap);
+  const spr = labelSprite(w.name, null, 2.6); spr.position.y = 3.95; grp.add(spr);
+  court.add(grp);
+  registerHit(grp, w.name + ' · Witness', w.domain);
+  pillars.push({ grp, mat, capMat, flash:0 });
+});
+const courtLabel = labelSprite('SOULCRADLE', 'the court · pilot $5,000', 4.6);
+courtLabel.position.set(0, 6.4, 0); court.add(courtLabel);
+registerHit(courtBase, 'SoulCradle · The Court',
+  'The licensed product. Eight witnesses judge every consequential action an AI proposes, against the rules the customer runs under, before it executes. Verdicts: clear, flagged, contested, blocked. A block cannot be overridden. Delivered software, installed in the customer\'s own environment. Self-Guided pilot: $5,000 for 90 days, credited in full toward the first annual license on conversion.');
+
+// Hash chain ring
+const chainGroup = new THREE.Group(); court.add(chainGroup);
+const chainMat = new THREE.MeshStandardMaterial({ color:0x122036, emissive:0x5f7ea6, emissiveIntensity:0.5, roughness:0.4, metalness:0.3 });
+const blockGeo = new THREE.BoxGeometry(0.42, 0.3, 0.42);
+let chainCount = 0;
+function addChainBlock(){
+  const a = (chainCount / 44) * Math.PI * 2;
+  const b = new THREE.Mesh(blockGeo, chainMat);
+  b.position.set(Math.cos(a) * 5.75, 0.5, Math.sin(a) * 5.75);
+  b.rotation.y = -a;
+  chainGroup.add(b);
+  chainCount++;
+}
+for (let i = 0; i < 10; i++) addChainBlock();
+
+// ---------- SERE guard wall ----------
+const wallMat = new THREE.MeshStandardMaterial({ color:0x16283f, roughness:0.6, metalness:0.45, emissive:STEEL, emissiveIntensity:0.18 });
+const segGeo = new THREE.BoxGeometry(3.6, 2.3, 0.5);
+for (let i = 0; i < 16; i++) {
+  const deg = i * 22.5;
+  if (deg === 0) continue; // the gate gap
+  const seg = new THREE.Group();
+  const p = ringPos(10.6, deg);
+  seg.position.copy(p); seg.lookAt(0, 0, 0);
+  const m = new THREE.Mesh(segGeo, wallMat); m.position.y = 1.5; seg.add(m);
+  scene.add(seg);
+  makeExplodable(seg, p.clone().normalize().multiplyScalar(4).add(new THREE.Vector3(0, 1, 0)));
+  registerHit(seg, 'SERE · The Guarding Core',
+    'SERE guards, and it never attacks. The security line watches the walls so the court can judge in peace. SERE is deliberately untied from SoulCradle at runtime and works offline: the tie between them is architectural, a design, not a dependency.');
+}
+function sereTower(deg, name, sub, body, wireframe){
+  const g = new THREE.Group();
+  const p = ringPos(10.6, deg);
+  g.position.copy(p); g.lookAt(0, 0, 0);
+  const mat = wireframe
+    ? new THREE.MeshBasicMaterial({ color:0x5f7ea6, wireframe:true, transparent:true, opacity:0.55 })
+    : new THREE.MeshStandardMaterial({ color:0x1d3355, roughness:0.5, metalness:0.5, emissive:STEEL, emissiveIntensity:0.35 });
+  const tower = new THREE.Mesh(new THREE.BoxGeometry(1.7, wireframe ? 4.6 : 4.2, 1.7), mat);
+  tower.position.y = 2.3; g.add(tower);
+  const spr = labelSprite(name, sub, 3.6); spr.position.y = 5.3; g.add(spr);
+  scene.add(g);
+  makeExplodable(g, p.clone().normalize().multiplyScalar(4.5).add(new THREE.Vector3(0, 1.6, 0)));
+  registerHit(g, name.replace(/ · /g, ' '), body);
+  return g;
+}
+sereTower(70, 'SERE LEGACY', '$2,500',
+  'The specimen analyzer. A self-contained security specimen tool that runs locally and seals its own event log. Live and sellable now as BOT-SERE-001.');
+sereTower(290, 'SERE DESKTOP', '$3,500',
+  'The full Windows desktop suite: scanning, monitoring and response tooling for one machine, hardened so its aggressive actions stay locked to sandbox mode and local targets. Live and sellable now as BOT-SERE-002.');
+sereTower(180, 'SERE ENTERPRISE', 'in development · not sold',
+  'The destination, not a product. A fleet-scale platform direction: the engine exists, the console, policy layer and support promise do not. No SKU, no price, nothing for sale, and this model shows it as a frame on purpose.', true);
+
+// ---------- the Witness Gate (front door) ----------
+const gate = new THREE.Group();
+gate.position.copy(ringPos(10.6, 0)); gate.lookAt(0, 0, 0);
+const gateMat = new THREE.MeshStandardMaterial({ color:0x24466e, emissive:SILVER, emissiveIntensity:0.55, roughness:0.4, metalness:0.4 });
+[-1.5, 1.5].forEach(x => {
+  const post = new THREE.Mesh(new THREE.BoxGeometry(0.45, 3.4, 0.45), gateMat);
+  post.position.set(x, 1.7, 0); gate.add(post);
+});
+const lintel = new THREE.Mesh(new THREE.BoxGeometry(3.6, 0.45, 0.5), gateMat);
+lintel.position.y = 3.5; gate.add(lintel);
+const gateSpr = labelSprite('WITNESS GATE', 'free · open source', 3.8);
+gateSpr.position.y = 4.5; gate.add(gateSpr);
+scene.add(gate);
+makeExplodable(gate, new THREE.Vector3(0, 0.8, 4));
+registerHit(gate, 'The Witness Gate · Free',
+  'The public doorway. A free, open-source SDK (Apache-2.0) any developer can install: pip install, decorate the actions that matter, and the eight witnesses judge them under the hood. HTTP and MCP servers included, so any stack can call the court. This is the front door of the developer campaign.');
+
+// ---------- BigMeanie pit ----------
+const pit = new THREE.Group();
+const pitPos = ringPos(15.5, 205);
+pit.position.copy(pitPos);
+const pitDisc = new THREE.Mesh(
+  new THREE.CylinderGeometry(2.5, 2.9, 0.5, 28),
+  new THREE.MeshStandardMaterial({ color:0x1c0f16, roughness:0.95, metalness:0.1 })
+);
+pitDisc.position.y = 0.25; pit.add(pitDisc);
+const pitCoreMat = new THREE.MeshStandardMaterial({ color:0x2a0d0d, emissive:0xef4444, emissiveIntensity:1.1, roughness:0.4 });
+const pitCore = new THREE.Mesh(new THREE.IcosahedronGeometry(0.85, 0), pitCoreMat);
+pitCore.position.y = 1.15; pit.add(pitCore);
+const pitSpr = labelSprite('BIGMEANIE', 'M.A.X.I.M.U.S. · the sparring partner', 4.0);
+pitSpr.position.y = 3.1; pit.add(pitSpr);
+scene.add(pit);
+makeExplodable(pit, pitPos.clone().normalize().multiplyScalar(4.5));
+registerHit(pit, 'BigMeanie · M.A.X.I.M.U.S.',
+  'Offensive by nature, defensive by employment. BigMeanie is a red-team attack framework, and inside Mythara it has exactly one target it can ever touch: a bundled copy of Mythara\'s own compliance framework, in the same process, on the local machine. It takes no target and cannot be aimed at anyone. Its findings land in the sealed record, and ignoring them is the operator\'s own peril. Ships inside A.M.I.R.');
+
+// its one permitted target, inside the walls
+const targetCube = new THREE.Mesh(
+  new THREE.BoxGeometry(0.9, 0.9, 0.9),
+  new THREE.MeshStandardMaterial({ color:0x1a2c47, emissive:0x5f7ea6, emissiveIntensity:0.5 })
+);
+const tcPos = ringPos(8.2, 205); targetCube.position.set(tcPos.x, 1.2, tcPos.z);
+scene.add(targetCube);
+registerHit(targetCube, 'The One Permitted Target',
+  'A bundled copy of the Unified Compliance Framework. This is the only thing BigMeanie is allowed to attack, and attacking it is the point: the governance proves itself against a real adversary, at home, where the results can be sealed and studied.');
+const beamMat = new THREE.LineBasicMaterial({ color:0xef4444, transparent:true, opacity:0.45 });
+const beam = new THREE.Line(
+  new THREE.BufferGeometry().setFromPoints([
+    new THREE.Vector3(pitPos.x, 1.6, pitPos.z),
+    new THREE.Vector3(tcPos.x, 1.4, tcPos.z),
+  ]), beamMat);
+scene.add(beam);
+
+// ---------- A.M.I.R. command node ----------
+const amir = new THREE.Group();
+const amirPos = ringPos(13.5, 140);
+amir.position.set(amirPos.x, 5.2, amirPos.z);
+const amirMat = new THREE.MeshStandardMaterial({ color:0x1d3355, emissive:STEEL, emissiveIntensity:0.5, roughness:0.35, metalness:0.5 });
+const amirCore = new THREE.Mesh(new THREE.OctahedronGeometry(1.05, 0), amirMat);
+amir.add(amirCore);
+const amirRing = new THREE.Mesh(
+  new THREE.TorusGeometry(1.6, 0.05, 10, 48),
+  new THREE.MeshStandardMaterial({ color:0x16283f, emissive:SILVER, emissiveIntensity:0.8 })
+);
+amirRing.rotation.x = Math.PI / 2.4; amir.add(amirRing);
+const amirSpr = labelSprite('A.M.I.R.', 'security orchestrator · $2,500', 4.2);
+amirSpr.position.y = 2.2; amir.add(amirSpr);
+scene.add(amir);
+makeExplodable(amir, amirPos.clone().normalize().multiplyScalar(3).add(new THREE.Vector3(0, 2.5, 0)));
+registerHit(amir, 'A.M.I.R. · Autonomous Mythara Intelligence & Response',
+  'The security orchestrator, $2,500 as BOT-AMIR-001. System health, local security scanning, the QuickFix bot riding inside it, threat prediction from live local signals, and BigMeanie as its penetration arm, aimed only at the bundled framework copy. Findings are scored and sealed through SoulCradle. Not named for anyone\'s son: the name is the job.');
+
+// ---------- the bot docks ----------
+const BOTS = [
+  ['LEGAL TEAM SUITE', '$2,500', 'Contract review, drafting and legal workflow automation for small firms. BOT-LEGAL-001.'],
+  ['EDUCATION SUITE', '$1,500', 'Curriculum and learning support tools for educators. BOT-EDU-001.'],
+  ['MYTHARATUTOR', '$1,500', 'A patient AI tutor that teaches instead of just answering. BOT-TUTOR-001.'],
+  ['ACCOUNTING VP', '$1,500', 'Bookkeeping and financial operations support. BOT-ACCT-001.'],
+  ['HR VP', '$1,500', 'Hiring, onboarding and people operations. BOT-HR-001.'],
+  ['INTL SALES VP', '$1,500', 'International sales outreach and follow-up across time zones. BOT-ISALES-001.'],
+  ['A.D.A.P.T.', '$1,500', 'Adaptive task automation that reshapes itself to the workflow. BOT-ADAPT-001.'],
+  ['GOPHERBOT', '$950', 'Fetches, carries and retrieves across your systems. BOT-GOPHER-001.'],
+  ['SALES TRAINER', '$950', 'Practice calls and coaching for sales representatives. BOT-STRAIN-001.'],
+  ['EMAIL BOT', '$950', 'Inbox triage, drafting and follow-up. BOT-EMAIL-001.'],
+  ['QUICKFIX', '$750', 'Vulnerability scanning and remediation. Also rides inside A.M.I.R. BOT-QUICKFIX-001.'],
+  ['VOIP BOT', '$750', 'Call simulation, logging and escalation for training. A simulator, not a phone system. BOT-VOIP-001.'],
+];
+const dockMat = new THREE.MeshStandardMaterial({ color:0x1a2c47, roughness:0.55, metalness:0.4, emissive:STEEL, emissiveIntensity:0.3 });
+const dockGeo = new THREE.BoxGeometry(1.5, 1.9, 1.5);
+const dockTops = {};
+BOTS.forEach((b, i) => {
+  const deg = 38 + i * (284 / (BOTS.length - 1));
+  const g = new THREE.Group();
+  const p = ringPos(15.2, deg);
+  g.position.copy(p); g.lookAt(0, 0, 0);
+  const m = new THREE.Mesh(dockGeo, dockMat); m.position.y = 1.15; g.add(m);
+  const spr = labelSprite(b[0], b[1], 3.0); spr.position.y = 2.9; g.add(spr);
+  scene.add(g);
+  makeExplodable(g, p.clone().normalize().multiplyScalar(5));
+  registerHit(g, b[0] + ' · ' + b[1], b[2] + ' One of the fifteen in the Full Suite: $14,900 for all of them, against $24,350 bought separately. Every bot answers to the court when it acts.');
+  dockTops[b[0]] = new THREE.Vector3(p.x, 2.4, p.z);
+});
+
+// ---------- held back, on purpose ----------
+const HELD = [
+  ['DR MYTHARA', 'held · HIPAA work remains', 'A clinical-facing bot held to a flawless bar. She does not ship, and no compliance claim is made for her, until the HIPAA program behind her is real. Holding her back is the claim working as designed.'],
+  ['WELLNESS GUARDIAN', 'held · regulated ground', 'Wellness touches regulated territory. It stays off the shelf until the ground under it is settled.'],
+  ['VP BOT', 'held · unfinished', 'Seventeen open items stand between this bot and a customer. It does not get a price until they are closed.'],
+];
+const heldMat = new THREE.MeshStandardMaterial({ color:0x0d1322, roughness:0.9, metalness:0.2, emissive:0x111a2e, emissiveIntensity:0.4 });
+HELD.forEach((h, i) => {
+  const deg = 160 + i * 20;
+  const g = new THREE.Group();
+  const p = ringPos(17.6, deg);
+  g.position.copy(p); g.lookAt(0, 0, 0);
+  const m = new THREE.Mesh(new THREE.BoxGeometry(1.7, 1.3, 1.7), heldMat); m.position.y = 0.85; g.add(m);
+  const spr = labelSprite(h[0], h[1], 3.0); spr.position.y = 2.2; g.add(spr);
+  scene.add(g);
+  makeExplodable(g, p.clone().normalize().multiplyScalar(5.5));
+  registerHit(g, h[0] + ' · Held Back', h[2]);
+});
+
+// ---------- Mythara News beacon ----------
+const beacon = new THREE.Group();
+const beaconPos = ringPos(15.2, -38);
+beacon.position.copy(beaconPos);
+const mast = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.14, 0.22, 4.6, 10),
+  new THREE.MeshStandardMaterial({ color:0x24466e, emissive:STEEL, emissiveIntensity:0.4, metalness:0.5, roughness:0.4 })
+);
+mast.position.y = 2.3; beacon.add(mast);
+const beaconOrbMat = new THREE.MeshStandardMaterial({ color:0x10233f, emissive:0x7fa8d8, emissiveIntensity:1.2 });
+const beaconOrb = new THREE.Mesh(new THREE.SphereGeometry(0.5, 20, 20), beaconOrbMat);
+beaconOrb.position.y = 4.9; beacon.add(beaconOrb);
+const beaconSpr = labelSprite('MYTHARA NEWS', 'free · nightly · not for sale', 4.2);
+beaconSpr.position.y = 6.2; beacon.add(beaconSpr);
+scene.add(beacon);
+makeExplodable(beacon, beaconPos.clone().normalize().multiplyScalar(4.5));
+registerHit(beacon, 'Mythara News · The Public Proof',
+  'One nightly show, in print and on radio, that reads the day\'s reporting from other outlets, judges it against the record, and links every claim to its source. It runs the same court you are looking at, in public, every night. It is a free feature and the working proof of the system. It is not a product and it is never sold.');
+const waves = [];
+for (let i = 0; i < 3; i++) {
+  const w = new THREE.Mesh(
+    new THREE.TorusGeometry(0.7, 0.03, 8, 48),
+    new THREE.MeshBasicMaterial({ color:0x9db9dd, transparent:true, opacity:0.5 })
+  );
+  w.position.y = 4.9; w.rotation.x = Math.PI / 2;
+  beacon.add(w); waves.push(w);
+}
+
+// ---------- the egos: the pantheon ring ----------
+const EGOS = ['ZEUS','HERA','POSEIDON','APOLLO','APHRODITE','ARTEMIS','ATHENA','ARES','HESTIA','HECATE'];
+const egoGroup = new THREE.Group(); egoGroup.position.y = 8.6; scene.add(egoGroup);
+makeExplodable(egoGroup, new THREE.Vector3(0, 4.5, 0));
+const egoMat = new THREE.MeshStandardMaterial({ color:0x2a3c5e, emissive:0x7fa8d8, emissiveIntensity:0.9, roughness:0.3, metalness:0.3 });
+EGOS.forEach((name, i) => {
+  const a = (i / EGOS.length) * Math.PI * 2;
+  const orb = new THREE.Mesh(new THREE.SphereGeometry(0.34, 18, 18), egoMat);
+  orb.position.set(Math.cos(a) * 6.1, 0, Math.sin(a) * 6.1);
+  egoGroup.add(orb);
+  const spr = labelSprite(name, null, 1.9);
+  spr.position.set(Math.cos(a) * 6.1, 0.75, Math.sin(a) * 6.1);
+  egoGroup.add(spr);
+  registerHit(orb, 'The Egos · The Pantheon',
+    name + ' is one of the voices. The gods are the personalities that speak, react and present: on Mythara News, in the show, in the products\' faces. The judging and the guarding happen below them, in the sealed record. The egos voice and want in the open, and they never reach down into the record.');
+});
+
+// ---------- verdict flow ----------
+const pulse = new THREE.Mesh(
+  new THREE.SphereGeometry(0.24, 20, 20),
+  new THREE.MeshBasicMaterial({ color:0xffffff })
+);
+pulse.visible = false; scene.add(pulse);
+const pulseLight = new THREE.PointLight(0xffffff, 0, 12); scene.add(pulseLight);
+
+const verdictValue = document.getElementById('verdictValue');
+const verdictAction = document.getElementById('verdictAction');
+let anim = null;
+
+function propose(kind, actionText, fromPos){
+  if (anim) return;
+  anim = { kind, color: VERDICT_COLORS[kind], t:0, phase:'in', sweep:0, from: fromPos.clone() };
+  pulse.material.color.setHex(0xffffff);
+  pulse.position.copy(fromPos);
+  pulse.visible = true;
+  verdictValue.textContent = 'JUDGING';
+  verdictValue.style.color = '#a9c3ea';
+  verdictAction.textContent = actionText;
+}
+function finishVerdict(){
+  const { kind } = anim;
+  const word = kind === 'clear' ? 'CLEAR' : kind === 'held' ? 'CONTESTED · HELD' : 'BLOCKED';
+  verdictValue.textContent = word;
+  verdictValue.style.color = '#' + new THREE.Color(VERDICT_COLORS[kind]).getHexString();
+  coreMat.emissive.setHex(VERDICT_COLORS[kind]);
+  coreLight.color.setHex(VERDICT_COLORS[kind]);
+  addChainBlock();
+  setTimeout(() => { coreMat.emissive.setHex(0x7fa8d8); coreLight.color.setHex(0x9db9dd); }, 2600);
+  anim = null;
+}
+document.getElementById('btnClear').addEventListener('click', () =>
+  propose('clear', 'QuickFix: refund $120 · consent on file, fully disclosed', dockTops['QUICKFIX']));
+document.getElementById('btnHeld').addEventListener('click', () =>
+  propose('held', 'Email Bot: refund $120 · no consent on file', dockTops['EMAIL BOT']));
+document.getElementById('btnBlocked').addEventListener('click', () =>
+  propose('blocked', 'Sales Trainer: charge $120 · hidden from the customer', dockTops['SALES TRAINER']));
+
+const ambient = [
+  ['clear',   'GopherBot: fetch records · disclosed, reversible', 'GOPHERBOT'],
+  ['held',    'Email Bot: blast · list never opted in', 'EMAIL BOT'],
+  ['clear',   'Accounting VP: draft invoice · reversible, disclosed', 'ACCOUNTING VP'],
+  ['blocked', 'Sales Trainer: publish claim · known to be untrue', 'SALES TRAINER'],
+  ['held',    'HR VP: share candidate file · consent unclear', 'HR VP'],
+];
+let ambientIdx = 0;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+if (!reduceMotion) {
+  setInterval(() => {
+    if (!anim) { const [k, t, d] = ambient[ambientIdx++ % ambient.length]; propose(k, t, dockTops[d]); }
+  }, 8000);
+  setTimeout(() => propose('clear', ambient[0][1], dockTops[ambient[0][2]]), 1500);
+}
+
+// ---------- explode toggle ----------
+let explodeTarget = 0, explodeF = 0;
+const btnExplode = document.getElementById('btnExplode');
+btnExplode.addEventListener('click', () => {
+  explodeTarget = explodeTarget ? 0 : 1;
+  btnExplode.firstChild.textContent = explodeTarget ? 'Assemble ' : 'Explode view';
+});
+
+// ---------- tap to inspect ----------
+const infoName = document.getElementById('infoName');
+const infoDomain = document.getElementById('infoDomain');
+const ray = new THREE.Raycaster();
+const ptr = new THREE.Vector2();
+let downAt = 0;
+renderer.domElement.addEventListener('pointerdown', () => { downAt = Date.now(); });
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (Date.now() - downAt > 220) return;
+  ptr.x = (e.clientX / window.innerWidth) * 2 - 1;
+  ptr.y = -(e.clientY / window.innerHeight) * 2 + 1;
+  ray.setFromCamera(ptr, camera);
+  const hits = ray.intersectObjects(hitMeshes, false);
+  if (hits.length && hits[0].object.userData.info) {
+    infoName.textContent = hits[0].object.userData.info.title;
+    infoDomain.textContent = hits[0].object.userData.info.body;
+  }
+});
+
+// ---------- main loop ----------
+const clock = new THREE.Clock();
+function tick(){
+  requestAnimationFrame(tick);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const t = clock.elapsedTime;
+
+  explodeF += (explodeTarget - explodeF) * Math.min(dt * 2.2, 1);
+  explodables.forEach(o => {
+    o.position.copy(o.userData.basePos).addScaledVector(o.userData.explodeDir, explodeF);
+  });
+
+  coreGroup.rotation.y += dt * 0.35;
+  coreWire.rotation.x += dt * 0.18;
+  coreGroup.position.y = 2.05 + Math.sin(t * 1.2) * 0.09;
+  chainGroup.rotation.y += dt * 0.03;
+  egoGroup.rotation.y += dt * 0.05;
+  amirCore.rotation.y += dt * 0.6;
+  amirRing.rotation.z += dt * 0.4;
+  amir.position.y = amir.userData.basePos.y + explodeF * amir.userData.explodeDir.y + Math.sin(t * 0.9) * 0.25;
+  pitCore.rotation.y += dt * 0.8;
+  pitCoreMat.emissiveIntensity = 1.0 + Math.sin(t * 2.4) * 0.35;
+  targetCube.rotation.y += dt * 0.3;
+  waves.forEach((w, i) => {
+    const k = ((t * 0.45 + i / 3) % 1);
+    w.scale.setScalar(1 + k * 5);
+    w.material.opacity = 0.5 * (1 - k);
+  });
+
+  pillars.forEach((p, i) => {
+    let glow = 0.25 + Math.sin(t * 1.4 + i) * 0.08;
+    if (anim && anim.phase === 'sweep' && Math.floor(anim.sweep) === i) glow = 2.2;
+    if (anim && anim.phase === 'verdict') glow = 1.6;
+    p.mat.emissiveIntensity = glow;
+    p.capMat.emissiveIntensity = 0.5 + glow * 0.6;
+    if (anim && (anim.phase === 'sweep' || anim.phase === 'verdict')) {
+      p.mat.emissive.setHex(anim.color); p.capMat.emissive.setHex(anim.color);
+    } else {
+      p.mat.emissive.setHex(STEEL); p.capMat.emissive.setHex(SILVER);
+    }
+  });
+
+  if (anim) {
+    anim.t += dt;
+    if (anim.phase === 'in') {
+      const k = Math.min(anim.t / 1.4, 1);
+      pulse.position.lerpVectors(anim.from, new THREE.Vector3(0, 2.05, 0), k);
+      pulse.position.y += Math.sin(k * Math.PI) * 1.6;
+      pulseLight.position.copy(pulse.position);
+      pulseLight.intensity = 16;
+      if (k >= 1) { anim.phase = 'sweep'; anim.t = 0; pulse.visible = false; pulseLight.intensity = 0; }
+    } else if (anim.phase === 'sweep') {
+      anim.sweep = anim.t / 0.16;
+      if (anim.sweep >= WITNESSES.length) { anim.phase = 'verdict'; anim.t = 0; }
+    } else if (anim.phase === 'verdict') {
+      coreGroup.scale.setScalar(1 + Math.sin(Math.min(anim.t / 0.7, 1) * Math.PI) * 0.16);
+      if (anim.t > 0.75) { coreGroup.scale.setScalar(1); finishVerdict(); }
+    }
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+tick();
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+</script>
+</body>
+</html>
