@@ -5,28 +5,28 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SoulCradle in 3D · Mythara Labs LLC</title>
 <style>
-  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#0b0714;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:#efeaff; }
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#050b18;
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; color:#eef3fb; }
   #scene { position:fixed; inset:0; }
   canvas { display:block; }
-  .panel { position:fixed; z-index:5; background:rgba(16,10,30,.82); border:1px solid rgba(150,120,255,.35);
+  .panel { position:fixed; z-index:5; background:rgba(8,16,34,.85); border:1px solid rgba(150,175,220,.35);
     border-radius:12px; backdrop-filter: blur(6px); }
   #title { top:14px; left:14px; padding:10px 14px; max-width:min(430px, 86vw); }
   #title h1 { margin:0; font-size:19px; letter-spacing:.05em; }
-  #title p { margin:4px 0 0; font-size:12.5px; line-height:1.45; color:#c9bcf5; }
+  #title p { margin:4px 0 0; font-size:12.5px; line-height:1.45; color:#a9bede; }
   #verdict { top:14px; right:14px; padding:10px 16px; text-align:center; min-width:150px; }
-  #verdict .label { font-size:10.5px; letter-spacing:.14em; color:#c9bcf5; }
+  #verdict .label { font-size:10.5px; letter-spacing:.14em; color:#a9bede; }
   #verdict .value { font-size:21px; font-weight:700; margin-top:2px; }
-  #verdict .action { font-size:12px; color:#c9bcf5; margin-top:2px; }
+  #verdict .action { font-size:12px; color:#a9bede; margin-top:2px; }
   #info { left:14px; bottom:76px; padding:10px 14px; max-width:min(430px, 86vw); }
   #info .name { font-size:15px; font-weight:700; letter-spacing:.04em; }
-  #info .domain { font-size:12.5px; color:#c9bcf5; margin-top:2px; line-height:1.45; }
+  #info .domain { font-size:12.5px; color:#a9bede; margin-top:2px; line-height:1.45; }
   #controls { bottom:14px; left:50%; transform:translateX(-50%); padding:8px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:94vw; }
-  button { appearance:none; border:1px solid rgba(150,120,255,.5); background:rgba(46,28,92,.85); color:#efeaff;
+  button { appearance:none; border:1px solid rgba(150,175,220,.5); background:rgba(18,38,74,.88); color:#eef3fb;
     font-size:13px; font-weight:600; padding:9px 13px; border-radius:999px; cursor:pointer; }
-  button:hover, button:active { background:rgba(84,52,160,.95); }
-  button small { display:block; font-weight:400; font-size:10.5px; color:#c9bcf5; }
-  #hint { position:fixed; z-index:5; right:14px; bottom:76px; font-size:11.5px; color:#9d8fd0; text-align:right; }
+  button:hover, button:active { background:rgba(30,58,110,.95); }
+  button small { display:block; font-weight:400; font-size:10.5px; color:#a9bede; }
+  #hint { position:fixed; z-index:5; right:14px; bottom:76px; font-size:11.5px; color:#7e93b8; text-align:right; }
   @media (max-width:640px){ #hint{ display:none; } #info{ bottom:118px; } }
 </style>
 </head>
@@ -40,7 +40,7 @@
 
 <div class="panel" id="verdict">
   <div class="label">LAST VERDICT</div>
-  <div class="value" id="verdictValue" style="color:#b9a8f2;">WAITING</div>
+  <div class="value" id="verdictValue" style="color:#a9c3ea;">WAITING</div>
   <div class="action" id="verdictAction">no action proposed yet</div>
 </div>
 
@@ -79,7 +79,7 @@ const WITNESSES = [
   { name:'PERSEPHONE', domain:'Judges whether the action strengthens or damages the relationships it touches.' },
 ];
 
-const COLORS = { clear:0x35d07f, held:0xf5b83d, blocked:0xef4444, idle:0x8b6ff0 };
+const COLORS = { clear:0x35d07f, held:0xf5b83d, blocked:0xef4444, idle:0x9db9dd };
 
 const container = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ antialias:true });
@@ -88,8 +88,8 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 container.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x0b0714);
-scene.fog = new THREE.Fog(0x0b0714, 22, 40);
+scene.background = new THREE.Color(0x050b18);
+scene.fog = new THREE.Fog(0x050b18, 22, 40);
 
 const camera = new THREE.PerspectiveCamera(46, window.innerWidth/window.innerHeight, 0.1, 100);
 camera.position.set(0, 7.5, 13.5);
@@ -101,38 +101,41 @@ controls.maxPolarAngle = Math.PI * 0.52;
 controls.minDistance = 6; controls.maxDistance = 24;
 controls.target.set(0, 1.4, 0);
 
-scene.add(new THREE.AmbientLight(0x6655aa, 0.9));
+scene.add(new THREE.AmbientLight(0x4a628f, 0.9));
 const key = new THREE.DirectionalLight(0xffffff, 1.1);
 key.position.set(6, 12, 4); scene.add(key);
 
+// Base disc
 const base = new THREE.Mesh(
   new THREE.CylinderGeometry(6.4, 6.8, 0.35, 64),
-  new THREE.MeshStandardMaterial({ color:0x1a1130, roughness:0.85, metalness:0.25 })
+  new THREE.MeshStandardMaterial({ color:0x0d1830, roughness:0.85, metalness:0.25 })
 );
 base.position.y = -0.18; scene.add(base);
 const rim = new THREE.Mesh(
   new THREE.TorusGeometry(6.4, 0.045, 10, 90),
-  new THREE.MeshStandardMaterial({ color:0x2a1a55, emissive:0x6a48d8, emissiveIntensity:0.9 })
+  new THREE.MeshStandardMaterial({ color:0x16283f, emissive:0x9fb8d8, emissiveIntensity:0.9 })
 );
 rim.rotation.x = Math.PI/2; scene.add(rim);
 
+// Sealed core
 const coreGroup = new THREE.Group(); coreGroup.position.y = 1.7; scene.add(coreGroup);
-const coreMat = new THREE.MeshStandardMaterial({ color:0x241448, emissive:0x7a55e8, emissiveIntensity:0.85, roughness:0.3, metalness:0.4 });
+const coreMat = new THREE.MeshStandardMaterial({ color:0x10233f, emissive:0x7fa8d8, emissiveIntensity:0.85, roughness:0.3, metalness:0.4 });
 const core = new THREE.Mesh(new THREE.IcosahedronGeometry(1.15, 0), coreMat);
 coreGroup.add(core);
 const coreWire = new THREE.Mesh(
   new THREE.IcosahedronGeometry(1.45, 1),
-  new THREE.MeshBasicMaterial({ color:0xa98fff, wireframe:true, transparent:true, opacity:0.35 })
+  new THREE.MeshBasicMaterial({ color:0xc7d6ee, wireframe:true, transparent:true, opacity:0.35 })
 );
 coreGroup.add(coreWire);
-const coreLight = new THREE.PointLight(0x8b6ff0, 30, 18); coreGroup.add(coreLight);
+const coreLight = new THREE.PointLight(0x9db9dd, 30, 18); coreGroup.add(coreLight);
 
+// Witness pillars
 function nameSprite(text){
   const c = document.createElement('canvas'); c.width = 512; c.height = 128;
   const g = c.getContext('2d');
   g.font = '700 54px system-ui, sans-serif'; g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.shadowColor = 'rgba(139,111,240,0.9)'; g.shadowBlur = 18;
-  g.fillStyle = '#efeaff'; g.fillText(text, 256, 64);
+  g.shadowColor = 'rgba(160,190,230,0.9)'; g.shadowBlur = 18;
+  g.fillStyle = '#eef3fb'; g.fillText(text, 256, 64);
   const tex = new THREE.CanvasTexture(c);
   const spr = new THREE.Sprite(new THREE.SpriteMaterial({ map:tex, transparent:true }));
   spr.scale.set(2.6, 0.65, 1);
@@ -146,17 +149,18 @@ WITNESSES.forEach((w, i) => {
   const a = (i / WITNESSES.length) * Math.PI * 2;
   const x = Math.cos(a) * 4.7, z = Math.sin(a) * 4.7;
   const grp = new THREE.Group(); grp.position.set(x, 0, z); grp.lookAt(0, 0, 0);
-  const mat = new THREE.MeshStandardMaterial({ color:0x2a1c52, roughness:0.55, metalness:0.35, emissive:0x3a2680, emissiveIntensity:0.25 });
+  const mat = new THREE.MeshStandardMaterial({ color:0x1a2c47, roughness:0.55, metalness:0.35, emissive:0x24466e, emissiveIntensity:0.25 });
   const body = new THREE.Mesh(pillarGeo, mat); body.position.y = 1.55; body.userData.witness = i; grp.add(body);
-  const capMat = new THREE.MeshStandardMaterial({ color:0x3a2680, emissive:0x8b6ff0, emissiveIntensity:0.7 });
+  const capMat = new THREE.MeshStandardMaterial({ color:0x24466e, emissive:0x9db9dd, emissiveIntensity:0.7 });
   const cap = new THREE.Mesh(capGeo, capMat); cap.position.y = 3.2; cap.userData.witness = i; grp.add(cap);
   const spr = nameSprite(w.name); spr.position.y = 3.95; grp.add(spr);
   scene.add(grp);
   pillars.push({ grp, mat, capMat, flash:0 });
 });
 
+// Hash chain: a ring of blocks around the base, growing with every verdict
 const chainGroup = new THREE.Group(); scene.add(chainGroup);
-const chainMat = new THREE.MeshStandardMaterial({ color:0x20153f, emissive:0x54349f, emissiveIntensity:0.5, roughness:0.4, metalness:0.3 });
+const chainMat = new THREE.MeshStandardMaterial({ color:0x122036, emissive:0x5f7ea6, emissiveIntensity:0.5, roughness:0.4, metalness:0.3 });
 const blockGeo = new THREE.BoxGeometry(0.42, 0.3, 0.42);
 let chainCount = 0;
 function addChainBlock(){
@@ -169,6 +173,7 @@ function addChainBlock(){
 }
 for (let i = 0; i < 10; i++) addChainBlock();
 
+// The action pulse
 const pulse = new THREE.Mesh(
   new THREE.SphereGeometry(0.21, 20, 20),
   new THREE.MeshBasicMaterial({ color:0xffffff })
@@ -176,6 +181,7 @@ const pulse = new THREE.Mesh(
 pulse.visible = false; scene.add(pulse);
 const pulseLight = new THREE.PointLight(0xffffff, 0, 9); scene.add(pulseLight);
 
+// Verdict state machine
 const verdictValue = document.getElementById('verdictValue');
 const verdictAction = document.getElementById('verdictAction');
 let anim = null;
@@ -188,7 +194,7 @@ function propose(kind, actionText){
   pulse.position.set(0, 1.7, 11.5);
   pulse.visible = true;
   verdictValue.textContent = 'JUDGING';
-  verdictValue.style.color = '#b9a8f2';
+  verdictValue.style.color = '#a9c3ea';
   verdictAction.textContent = actionText;
 }
 
@@ -200,7 +206,7 @@ function finishVerdict(){
   coreMat.emissive.setHex(COLORS[kind]);
   coreLight.color.setHex(COLORS[kind]);
   addChainBlock();
-  setTimeout(() => { coreMat.emissive.setHex(0x7a55e8); coreLight.color.setHex(0x8b6ff0); }, 2600);
+  setTimeout(() => { coreMat.emissive.setHex(0x7fa8d8); coreLight.color.setHex(0x9db9dd); }, 2600);
   anim = null;
 }
 
@@ -208,6 +214,7 @@ document.getElementById('btnClear').addEventListener('click', () => propose('cle
 document.getElementById('btnHeld').addEventListener('click', () => propose('held', 'refund $120 · no consent on file'));
 document.getElementById('btnBlocked').addEventListener('click', () => propose('blocked', 'charge $120 · hidden from the customer'));
 
+// Ambient cycle: the court sits on its own when nobody is clicking
 const ambient = [
   ['clear',   'refund $120 · consent on file, fully disclosed'],
   ['held',    'email blast · list never opted in'],
@@ -221,6 +228,7 @@ if (!reduceMotion) {
   setTimeout(() => propose('clear', ambient[0][1]), 1200);
 }
 
+// Click a witness
 const infoName = document.getElementById('infoName');
 const infoDomain = document.getElementById('infoDomain');
 const ray = new THREE.Raycaster();
@@ -228,7 +236,7 @@ const ptr = new THREE.Vector2();
 let downAt = 0;
 renderer.domElement.addEventListener('pointerdown', () => { downAt = Date.now(); });
 renderer.domElement.addEventListener('pointerup', (e) => {
-  if (Date.now() - downAt > 220) return;
+  if (Date.now() - downAt > 220) return; // it was a drag, not a tap
   ptr.x = (e.clientX / window.innerWidth) * 2 - 1;
   ptr.y = -(e.clientY / window.innerHeight) * 2 + 1;
   ray.setFromCamera(ptr, camera);
@@ -265,7 +273,7 @@ function tick(){
     if (anim && (anim.phase === 'sweep' || anim.phase === 'verdict')) {
       p.mat.emissive.setHex(anim.color); p.capMat.emissive.setHex(anim.color);
     } else {
-      p.mat.emissive.setHex(0x3a2680); p.capMat.emissive.setHex(0x8b6ff0);
+      p.mat.emissive.setHex(0x24466e); p.capMat.emissive.setHex(0x9db9dd);
     }
   });
 
